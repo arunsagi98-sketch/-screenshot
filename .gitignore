@@ -1,0 +1,55 @@
+# ── Secrets ───────────────────────────────────────────────────────────────────
+.env
+*.env.local
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# ── Database ──────────────────────────────────────────────────────────────────
+*.db
+*.sqlite3
+
+# ── Browser profile data ──────────────────────────────────────────────────────
+browser_data/
+browser_data_desktop/
+browser_data_mobile/
+
+# ── Output artefacts (large / generated) ──────────────────────────────────────
+screenshots/*.png
+screenshots/*.jpg
+Backend_Screenshot/screenshots/*.png
+Backend_Screenshot/screenshots/*.jpg
+input_images/*.png
+input_images/*.jpg
+input_images/*.webp
+input_images/*.gif
+ppt_assets/
+extracted_ppt_media/
+*.pptx
+
+# ── Temp / test files ─────────────────────────────────────────────────────────
+*.bat
+test.png
+.pytest_cache/
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+server.out.log
+server.err.log
+
+# ── OS / editor ───────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Final Report — AdVision AI</title>
+  <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+  <link rel="stylesheet" href="style.css?v=3">
+  <style>
+    .fr-wrap {
+      margin-left: var(--sidebar-w);
+      padding: 28px 32px;
+      min-height: 100vh;
+    }
+
+    /* Upload card */
+    .fr-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-bottom: 20px;
+    }
+
+    .fr-card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .fr-card-sub {
+      font-size: 0.78rem;
+      color: var(--text-sec);
+      margin-bottom: 22px;
+    }
+
+    /* Upload zone */
+    .upload-zone {
+      border: 1.5px dashed rgba(99, 102, 241, 0.35);
+      border-radius: 10px;
+      padding: 52px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(99, 102, 241, 0.03);
+      position: relative;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.drag-over {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.07);
+    }
+
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .upload-icon {
+      width: 52px;
+      height: 52px;
+      background: rgba(99, 102, 241, 0.12);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+      font-size: 26px;
+      color: var(--accent);
+    }
+
+    .upload-text {
+      font-size: 0.92rem;
+      color: var(--text);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .upload-sub {
+      font-size: 0.75rem;
+      color: var(--text-sec);
+    }
+
+    .file-chip {
+      display: none;
+      margin-top: 16px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-size: 0.8rem;
+      color: var(--accent);
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .file-chip.show {
+      display: flex;
+    }
+
+    .btn-process {
+      margin-top: 20px;
+      background: var(--grad);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 28px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.2s;
+    }
+
+    .btn-process:hover {
+      opacity: 0.88;
+    }
+
+    .btn-process:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* Results section */
+    .results-section {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .results-section.show {
+      display: block;
+    }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .results-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .results-count {
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--accent);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 20px;
+    }
+
+    .result-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .result-entry {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .result-entry+.result-entry {
+      margin-top: 8px;
+    }
+
+    .result-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      transition: border-color 0.15s;
+    }
+
+    .result-item:hover {
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .result-file-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .result-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .result-name {
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .result-filename {
+      font-size: 0.71rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .badge-video {
+      background: rgba(139, 92, 246, 0.15);
+      color: #8b5cf6;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .badge-banner {
+      background: rgba(16, 185, 129, 0.12);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .btn-dl-item {
+      background: rgba(99, 102, 241, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: 8px;
+      padding: 7px 16px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+
+    .btn-dl-item:hover {
+      background: rgba(99, 102, 241, 0.22);
+    }
+
+    .btn-ready {
+      background: var(--grad);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 16px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: opacity 0.15s;
+    }
+
+    .btn-ready:hover {
+      opacity: 0.85;
+    }
+
+    .btn-ready.active {
+      background: rgba(99, 102, 241, 0.2);
+      color: var(--accent);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+    }
+
+    /* Ready form panel */
+    .ready-panel {
+      display: none;
+      background: rgba(99, 102, 241, 0.04);
+      border: 1.5px solid rgba(99, 102, 241, 0.25);
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      padding: 22px 22px 18px;
+      animation: slideDown 0.2s ease;
+    }
+
+    .ready-panel.open {
+      display: block;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .rp-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 16px;
+    }
+
+    .rp-section-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .rp-field {
+      margin-bottom: 12px;
+    }
+
+    .rp-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-sec);
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .rp-tag {
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    .rp-tag-req {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+
+    .rp-tag-opt {
+      background: rgba(99, 102, 241, 0.12);
+      color: var(--accent);
+    }
+
+    .rp-prefilled {
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 0.78rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rp-prefilled i {
+      color: var(--accent);
+    }
+
+    .rp-input,
+    .rp-select,
+    .rp-textarea {
+      width: 100%;
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 0.78rem;
+      color: var(--text);
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.15s;
+    }
+
+    .rp-input:focus,
+    .rp-select:focus,
+    .rp-textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .rp-select {
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .rp-textarea {
+      resize: vertical;
+      min-height: 72px;
+    }
+
+    .rp-upload-zone {
+      border: 1.5px dashed rgba(99, 102, 241, 0.25);
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .rp-upload-zone:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .rp-upload-zone input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .rp-upload-zone.has-file {
+      border-color: rgba(16, 185, 129, 0.4);
+      color: var(--success);
+    }
+
+    /* Checkbox lists */
+    .rp-check-list {
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      max-height: 140px;
+      overflow-y: auto;
+      padding: 4px 0;
+    }
+
+    .rp-check-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 12px;
+      cursor: pointer;
+      transition: background 0.1s;
+      font-size: 0.76rem;
+      color: var(--text);
+    }
+
+    .rp-check-item:hover {
+      background: rgba(99, 102, 241, 0.07);
+    }
+
+    .rp-check-item input[type=checkbox] {
+      accent-color: var(--accent);
+      width: 14px;
+      height: 14px;
+    }
+
+    .rp-search {
+      width: 100%;
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      padding: 7px 12px;
+      font-size: 0.75rem;
+      color: var(--text);
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    .rp-search:focus {
+      border-color: var(--accent);
+    }
+
+    /* City sheets - full width */
+    .rp-cities {
+      margin-bottom: 16px;
+    }
+
+    /* Generate button */
+    .btn-generate {
+      width: 100%;
+      padding: 13px;
+      background: var(--grad);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: opacity 0.15s;
+    }
+
+    .btn-generate:hover {
+      opacity: 0.88;
+    }
+
+    .btn-generate:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* Pipeline steps */
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 4px;
+    }
+
+    .step-card {
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      position: relative;
+    }
+
+    .step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .step-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 5px;
+    }
+
+    .step-desc {
+      font-size: 0.72rem;
+      color: var(--text-sec);
+      line-height: 1.55;
+    }
+
+    /* Summary boxes */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 4px;
+    }
+
+    .summary-item {
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .summary-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .summary-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+
+    .summary-desc {
+      font-size: 0.71rem;
+      color: var(--text-sec);
+      line-height: 1.4;
+    }
+
+    /* Toast */
+    .fr-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 0.82rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 9999;
+    }
+
+    .fr-toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .fr-toast.success i {
+      color: var(--success);
+    }
+
+    .fr-toast.error i {
+      color: var(--error);
+    }
+
+    @media (max-width: 900px) {
+      .pipeline {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── Saved Reports ── */
+    .sr-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.83rem;
+    }
+
+    .sr-table th {
+      text-align: left;
+      padding: 8px 12px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .sr-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+    }
+
+    .sr-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .sr-table tr:hover td {
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .sr-name {
+      font-weight: 500;
+      color: var(--text);
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .sr-date {
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .sr-size {
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .sr-btn-dl {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: #10b981;
+      padding: 5px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .sr-btn-dl:hover {
+      background: rgba(16, 185, 129, 0.22);
+    }
+
+    .sr-btn-del {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: transparent;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: rgba(239, 68, 68, 0.7);
+      padding: 5px 10px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-left: 6px;
+    }
+
+    .sr-btn-del:hover {
+      background: rgba(239, 68, 68, 0.08);
+      color: #ef4444;
+    }
+
+    .sr-empty {
+      text-align: center;
+      padding: 32px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══════ SIDEBAR ═══════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon"><i class='bx bx-film'></i></div>
+      <div>
+        <div class="logo-name">AdVision AI</div>
+        <div class="logo-sub">Ad Injector Platform</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">MAIN</div>
+      <a href="index.html" class="nav-item"><i class='bx bxs-dashboard'></i> Dashboard</a>
+      <a href="ppt-store.html" class="nav-item"><i class='bx bx-broadcast'></i> PPT Store</a>
+      <a href="#" class="nav-item"><i class='bx bx-link'></i> URL Manager</a>
+      <a href="#" class="nav-item"><i class='bx bx-image'></i> Image Manager</a>
+      <a href="#" class="nav-item"><i class='bx bx-shield'></i> VPN Manager</a>
+      <a href="#" class="nav-item"><i class='bx bx-task'></i> Tasks</a>
+      <div class="nav-label">ANALYTICS</div>
+      <a href="#" class="nav-item"><i class='bx bx-bar-chart-alt-2'></i> Reports</a>
+      <a href="#" class="nav-item"><i class='bx bx-history'></i> Activity Logs</a>
+      <div class="nav-label">SYSTEM</div>
+      <a href="crm-excel.html" class="nav-item"><i class='bx bx-credit-card'></i> CRM Excel Processor</a>
+      <a href="final-report.html" class="nav-item active"><i class='bx bx-file'></i> Final Report</a>
+      <a href="#" class="nav-item"><i class='bx bx-support'></i> Reach Report</a>
+      <a href="#" class="nav-item"><i class='bx bx-cog'></i> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sys-status-row">
+        <span class="dot-green"></span>
+        <div>
+          <div class="sys-status-title">System Status</div>
+          <div id="backend-status" class="sys-status-sub">Checking...</div>
+        </div>
+      </div>
+      <div class="version-txt">Version 2.1.0</div>
+    </div>
+  </aside>
+
+  <!-- ═══════ MAIN ═══════ -->
+  <div class="fr-wrap">
+
+    <!-- Header -->
+    <header class="top-header" style="margin-left:0;position:static;border-radius:12px;margin-bottom:24px;">
+      <div class="page-title-block">
+        <h1 class="page-h1">Final Report</h1>
+        <p class="page-sub">Split multi-sheet Excel files into structured output — one block = one sheet</p>
+      </div>
+    </header>
+
+    <!-- Upload card -->
+    <div class="fr-card">
+      <div class="fr-card-title">Upload Excel File</div>
+      <div class="fr-card-sub">Upload your .xlsx or .xls file. Each data block (box) will become a separate sheet in the
+        output.</div>
+
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="file-input" accept=".xlsx,.xls">
+        <div class="upload-icon"><i class='bx bx-table'></i></div>
+        <div class="upload-text">Drag &amp; drop your Excel file here, or click to browse</div>
+        <div class="upload-sub">Supports .xlsx · .xls</div>
+      </div>
+
+      <div class="file-chip" id="file-chip">
+        <i class='bx bx-file-blank'></i>
+        <span id="file-label">—</span>
+        <button onclick="clearFile()"
+          style="background:none;border:none;color:var(--text-muted);cursor:pointer;margin-left:4px;">
+          <i class='bx bx-x'></i>
+        </button>
+      </div>
+
+      <div>
+        <button class="btn-process" id="btn-process" onclick="processFile()" disabled>
+          <i class='bx bx-git-branch'></i> Generate Final Report
+        </button>
+      </div>
+
+      <!-- Results list -->
+      <div class="results-section" id="results-section">
+        <div class="results-header">
+          <div class="results-title">
+            <i class='bx bx-check-circle' style="color:var(--success);"></i>
+            Processed Files
+            <span class="results-count" id="results-count">0</span>
+          </div>
+        </div>
+        <div class="result-list" id="result-list"></div>
+      </div>
+    </div>
+
+
+    <!-- Saved Reports -->
+    <div class="fr-card" id="saved-reports-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <div class="fr-card-title" style="margin-bottom:2px;">
+            <i class='bx bx-folder-open' style="color:var(--accent);margin-right:6px;"></i>Saved Reports
+          </div>
+          <div class="fr-card-sub">All generated reports — download anytime</div>
+        </div>
+        <button onclick="loadSavedReports()" style="
+          background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.25);
+          color:var(--accent);padding:6px 14px;border-radius:8px;cursor:pointer;font-size:0.82rem;
+          display:flex;align-items:center;gap:6px;">
+          <i class='bx bx-refresh'></i> Refresh
+        </button>
+      </div>
+      <div id="saved-reports-list">
+        <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:0.85rem;">
+          <i class='bx bx-loader-alt bx-spin' style="font-size:1.5rem;display:block;margin-bottom:8px;"></i>
+          Loading reports…
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /fr-wrap -->
+
+  <!-- Toast -->
+  <div class="fr-toast" id="fr-toast">
+    <i class='bx bx-check-circle'></i>
+    <span id="toast-msg">Done</span>
+  </div>
+
+  <script type="module">
+    import { API_BASE_URL } from './src/config/apiConfig.js';
+    window._API = API_BASE_URL;
+  </script>
+
+  <script>
+    let selectedFile = null;
+
+    // ── Toast ──────────────────────────────────────────────────────────
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('fr-toast');
+      const icons = { success: 'bx-check-circle', error: 'bx-error-circle' };
+      t.className = `fr-toast ${type}`;
+      t.querySelector('i').className = `bx ${icons[type] || icons.success}`;
+      document.getElementById('toast-msg').textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    // ── Upload ─────────────────────────────────────────────────────────
+    const zone = document.getElementById('upload-zone');
+    const input = document.getElementById('file-input');
+
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); zone.classList.remove('drag-over');
+      if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+    });
+    input.addEventListener('change', () => { if (input.files[0]) setFile(input.files[0]); });
+
+    function setFile(f) {
+      const ext = f.name.split('.').pop().toLowerCase();
+      if (!['xlsx', 'xls'].includes(ext)) {
+        showToast('Only .xlsx and .xls files allowed', 'error'); return;
+      }
+      selectedFile = f;
+      document.getElementById('file-label').textContent = f.name;
+      document.getElementById('file-chip').classList.add('show');
+      document.getElementById('btn-process').disabled = false;
+      document.getElementById('results-section').classList.remove('show');
+      document.getElementById('result-list').innerHTML = '';
+    }
+
+    function clearFile() {
+      selectedFile = null;
+      input.value = '';
+      document.getElementById('file-chip').classList.remove('show');
+      document.getElementById('btn-process').disabled = true;
+      document.getElementById('results-section').classList.remove('show');
+      document.getElementById('result-list').innerHTML = '';
+    }
+    window.clearFile = clearFile;
+
+    // ── Download individual file ───────────────────────────────────────
+    async function downloadResultFile(filename, displayName) {
+      try {
+        const api = window._API || 'http://127.0.0.1:8001';
+        const resp = await fetch(`${api}/final-report/download?file=${encodeURIComponent(filename)}`);
+        if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = displayName || filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+        showToast('Downloading...', 'success');
+      } catch (e) {
+        showToast(e.message || 'Download failed', 'error');
+      }
+    }
+    window.downloadResultFile = downloadResultFile;
+
+    function downloadByIndex(idx) {
+      const filename = window._frFileMap && window._frFileMap[idx];
+      if (!filename) { showToast('File info missing', 'error'); return; }
+      downloadResultFile(filename, filename);
+    }
+    window.downloadByIndex = downloadByIndex;
+
+    // ── Process ────────────────────────────────────────────────────────
+    async function processFile() {
+      if (!selectedFile) return;
+      const btn = document.getElementById('btn-process');
+      btn.disabled = true;
+      btn.innerHTML = `<i class='bx bx-loader-alt bx-spin'></i> Processing...`;
+
+      try {
+        const api = window._API || 'http://127.0.0.1:8001';
+        const form = new FormData();
+        form.append('file', selectedFile);
+
+        const resp = await fetch(`${api}/final-report/process`, {
+          method: 'POST', body: form,
+        });
+
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          throw new Error(err.detail || `Server error ${resp.status}`);
+        }
+
+        const files = await resp.json();   // [{name, filename, ad_type}, ...]
+
+        // Render results
+        // Store filenames by index — avoids quote issues in onclick
+        window._frFileMap = {};
+        files.forEach((f, i) => { window._frFileMap[i] = f.filename; });
+
+        const list = document.getElementById('result-list');
+        document.getElementById('results-count').textContent = files.length;
+        list.innerHTML = files.map((f, i) => {
+          const isVideo = f.ad_type === 'Video';
+          const badge = isVideo
+            ? `<span class="badge-video"><i class='bx bx-play-circle'></i> Video</span>`
+            : `<span class="badge-banner"><i class='bx bx-image'></i> Banner</span>`;
+          const iconBg = isVideo ? 'rgba(139,92,246,0.12)' : 'rgba(16,185,129,0.12)';
+          const iconCol = isVideo ? '#8b5cf6' : '#10b981';
+          const iconCls = isVideo ? 'bx-play-circle' : 'bx-image';
+          const reportType = isVideo ? 'Video Campaign' : 'Banner Campaign';
+          return `<div class="result-entry" id="entry-${i}">
+            <div class="result-item" style="border-radius:10px;" id="item-${i}">
+              <div class="result-file-icon" style="background:${iconBg};color:${iconCol};">
+                <i class='bx ${iconCls}'></i>
+              </div>
+              <div class="result-info">
+                <div class="result-name">${f.name}</div>
+                <div class="result-filename">${f.filename}</div>
+              </div>
+              ${badge}
+              <button class="btn-dl-item" onclick="downloadByIndex(${i})">
+                <i class='bx bx-download'></i> Download
+              </button>
+              <button class="btn-ready" id="ready-btn-${i}" onclick="toggleReadyPanel(${i})">
+                <i class='bx bx-rocket'></i> Ready
+              </button>
+            </div>
+            <div class="ready-panel" id="ready-panel-${i}" data-report-type="${reportType}" data-filename="${f.filename}" data-idx="${i}">
+              ${buildReadyForm(i, reportType, f.filename)}
+            </div>
+          </div>`;
+        }).join('');
+
+        document.getElementById('results-section').classList.add('show');
+        showToast(`${files.length} file${files.length > 1 ? 's' : ''} ready!`, 'success');
+      } catch (e) {
+        showToast(e.message || 'Processing failed', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class='bx bx-git-branch'></i> Generate Final Report`;
+      }
+    }
+    window.processFile = processFile;
+
+    // ── Ready panel ───────────────────────────────────────────────────
+    // Loaded from DB — no hardcoded lists
+    let _languages = [];
+    let _cities = [];
+    let _dbLoaded = false;
+
+    async function loadDbLists() {
+      if (_dbLoaded) return;
+      const api = window._API || 'http://127.0.0.1:8001';
+      try {
+        const [lr, cr] = await Promise.all([
+          fetch(`${api}/final-report/languages`).then(r => r.json()),
+          fetch(`${api}/final-report/cities`).then(r => r.json()),
+        ]);
+        _languages = lr.languages || [];
+        _cities = cr.cities || [];
+        _dbLoaded = true;
+      } catch (e) {
+        showToast('Could not load language/city lists from backend', 'error');
+      }
+    }
+
+    function buildReadyForm(idx, reportType, filename) {
+      const langItems = _languages.length
+        ? _languages.map(l =>
+          `<label class="rp-check-item">
+              <input type="checkbox" name="lang_${idx}[]" value="${l}"> ${l}
+            </label>`
+        ).join('')
+        : `<div style="padding:10px;font-size:0.75rem;color:var(--text-muted);">Loading...</div>`;
+
+      const cityItems = _cities.length
+        ? _cities.map(c =>
+          `<label class="rp-check-item">
+              <input type="checkbox" name="city_${idx}[]" value="${c}"> ${c}
+            </label>`
+        ).join('')
+        : `<div style="padding:10px;font-size:0.75rem;color:var(--text-muted);">Loading...</div>`;
+
+      return `
+      <div class="rp-grid">
+        <!-- LEFT: Upload Files -->
+        <div>
+          <div class="rp-section-title"><i class='bx bx-upload'></i> Upload Your Files</div>
+
+          <div class="rp-field">
+            <div class="rp-label">Report Type</div>
+            <div class="rp-prefilled">
+              <i class='bx bx-film'></i> ${reportType}
+            </div>
+          </div>
+
+          <div class="rp-field">
+            <div class="rp-label">Primary Campaign Data <span class="rp-tag rp-tag-req">Required</span></div>
+            <div class="rp-prefilled">
+              <i class='bx bx-file-blank'></i> ${filename}
+            </div>
+          </div>
+
+          <div class="rp-field">
+            <div class="rp-label">Creative / Line Item Data <span class="rp-tag rp-tag-opt">Optional</span></div>
+            <div class="rp-upload-zone" id="city-zone-${idx}">
+              <input type="file" accept=".csv,.xlsx,.xls" onchange="onCityFileChange(this, ${idx})">
+              <i class='bx bx-image-alt' style="font-size:18px;margin-bottom:4px;"></i><br>
+              Upload file with Creative column (for CREATIVE sheet)
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Screenshot URLs -->
+        <div>
+          <div class="rp-section-title"><i class='bx bx-link'></i> Screenshot URLs</div>
+
+          <div class="rp-field">
+            <div class="rp-label">Language / App Database</div>
+            <input class="rp-search" placeholder="Search languages..."
+              oninput="filterList(this, 'lang-list-${idx}')">
+            <div class="rp-check-list" id="lang-list-${idx}">${langItems}</div>
+          </div>
+
+          <div class="rp-field">
+            <div class="rp-label">App / Website URLs</div>
+            <textarea class="rp-textarea" id="urls-${idx}"
+              placeholder="facebook.com&#10;youtube.com&#10;instagram.com"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- City Database Sheets -->
+      <div class="rp-cities">
+        <div class="rp-section-title"><i class='bx bx-buildings'></i> City Database Sheets</div>
+        <div style="font-size:0.71rem;color:var(--text-muted);margin-bottom:8px;">
+          City data source — pivot cities matched against these sheets and combined.
+        </div>
+        <input class="rp-search" style="border-radius:8px 8px 0 0;"
+          placeholder="Search city sheets..."
+          oninput="filterList(this, 'city-list-${idx}')">
+        <div class="rp-check-list" id="city-list-${idx}">${cityItems}</div>
+      </div>
+
+      <button class="btn-generate" onclick="generateReport(${idx})">
+        <i class='bx bx-rocket'></i> Generate My Report
+      </button>`;
+    }
+
+    async function toggleReadyPanel(idx) {
+      const panel = document.getElementById(`ready-panel-${idx}`);
+      const btn = document.getElementById(`ready-btn-${idx}`);
+      const item = document.getElementById(`item-${idx}`);
+      const isOpen = panel.classList.contains('open');
+
+      // Close all panels first
+      document.querySelectorAll('.ready-panel.open').forEach(p => p.classList.remove('open'));
+      document.querySelectorAll('.btn-ready.active').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.result-item').forEach(el => {
+        el.style.borderRadius = '10px';
+      });
+
+      if (!isOpen) {
+        // Load DB lists first (cached after first call)
+        await loadDbLists();
+
+        // Rebuild the panel content with real data
+        const reportType = panel.dataset.reportType;
+        const filename = panel.dataset.filename;
+        const i = parseInt(panel.dataset.idx);
+        panel.innerHTML = buildReadyForm(i, reportType, filename);
+
+        panel.classList.add('open');
+        btn.classList.add('active');
+        item.style.borderRadius = '10px 10px 0 0';
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+    window.toggleReadyPanel = toggleReadyPanel;
+
+    function filterList(input, listId) {
+      const q = input.value.toLowerCase();
+      const items = document.querySelectorAll(`#${listId} .rp-check-item`);
+      items.forEach(el => {
+        el.style.display = el.textContent.toLowerCase().includes(q) ? '' : 'none';
+      });
+    }
+    window.filterList = filterList;
+
+    function onCityFileChange(input, idx) {
+      const zone = document.getElementById(`city-zone-${idx}`);
+      if (input.files[0]) {
+        zone.classList.add('has-file');
+        zone.querySelector('br').nextSibling.textContent = input.files[0].name;
+      }
+    }
+    window.onCityFileChange = onCityFileChange;
+
+    async function generateReport(idx) {
+      const langs = [...document.querySelectorAll(`input[name="lang_${idx}[]"]:checked`)].map(c => c.value);
+      const cities = [...document.querySelectorAll(`input[name="city_${idx}[]"]:checked`)].map(c => c.value);
+      const urls = document.getElementById(`urls-${idx}`).value.trim();
+      const fname = window._frFileMap[idx];
+
+      if (!langs.length) { showToast('Select at least one language', 'error'); return; }
+      if (!cities.length) { showToast('Select at least one city sheet', 'error'); return; }
+
+      // Detect mode from ad_type badge in the result item
+      const entry = document.getElementById(`entry-${idx}`);
+      const isVideo = entry && entry.querySelector('.badge-video') !== null;
+      const mode = isVideo ? 'video' : 'banner';
+
+      // Disable generate button & show spinner
+      const btn = entry && entry.querySelector('.btn-generate');
+      if (btn) { btn.disabled = true; btn.innerHTML = `<i class='bx bx-loader-alt bx-spin'></i> Generating...`; }
+
+      try {
+        const api = window._API || 'http://127.0.0.1:8001';
+        const form = new FormData();
+        form.append('filename', fname);
+        form.append('languages', langs.join(','));
+        form.append('cities', cities.join(','));
+        form.append('app_urls', urls);
+        form.append('mode', mode);
+
+        // Attach optional second file (City / Line Item Data) for CREATIVE sheet
+        const cityInput = document.querySelector(`#city-zone-${idx} input[type="file"]`);
+        if (cityInput && cityInput.files[0]) {
+          form.append('file2', cityInput.files[0]);
+        }
+
+        const resp = await fetch(`${api}/final-report/generate`, { method: 'POST', body: form });
+
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          throw new Error(err.detail || `Server error ${resp.status}`);
+        }
+
+        // Trigger file download
+        const blob = await resp.blob();
+        const disposition = resp.headers.get('Content-Disposition') || '';
+        const match = disposition.match(/filename="?([^"]+)"?/);
+        const dlName = match ? match[1] : `report_${fname}`;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = dlName; a.style.display = 'none';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+        showToast(`Report downloaded: ${dlName}`, 'success');
+        loadSavedReports(); // refresh saved-reports list
+      } catch (e) {
+        showToast(e.message || 'Report generation failed', 'error');
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = `<i class='bx bx-rocket'></i> Generate My Report`; }
+      }
+    }
+    window.generateReport = generateReport;
+
+    // ── Saved Reports ──────────────────────────────────────────────────
+    function _fmtSize(bytes) {
+      if (!bytes) return '-';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+    }
+
+    function _fmtDate(iso) {
+      if (!iso) return '-';
+      const d = new Date(iso);
+      return d.toLocaleDateString('en-AU', { day: '2-digit', month: 'short', year: 'numeric' })
+        + ' ' + d.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    async function loadSavedReports() {
+      const container = document.getElementById('saved-reports-list');
+      container.innerHTML = `<div class="sr-empty"><i class='bx bx-loader-alt bx-spin' style="font-size:1.4rem;display:block;margin-bottom:8px;"></i>Loading…</div>`;
+      try {
+        const api = window._API || 'http://127.0.0.1:8001';
+        const resp = await fetch(`${api}/final-report/reports`);
+        if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+        const reports = await resp.json();
+
+        if (!reports.length) {
+          container.innerHTML = `<div class="sr-empty"><i class='bx bx-folder-open' style="font-size:1.8rem;display:block;margin-bottom:8px;opacity:.4;"></i>No reports saved yet — generate one above!</div>`;
+          return;
+        }
+
+        const rows = reports.map(r => `
+          <tr>
+            <td><div class="sr-name" title="${r.filename}">${r.campaign_name || r.filename}</div>
+                <div style="font-size:0.74rem;color:var(--text-muted);margin-top:2px;">${r.filename}</div></td>
+            <td class="sr-date">${_fmtDate(r.generated_at)}</td>
+            <td class="sr-size">${_fmtSize(r.file_size)}</td>
+            <td style="white-space:nowrap;">
+              <button class="sr-btn-dl" onclick="downloadSavedReport(${r.id}, '${r.filename}')">
+                <i class='bx bx-download'></i> Download
+              </button>
+              <button class="sr-btn-del" onclick="deleteSavedReport(${r.id})" title="Delete">
+                <i class='bx bx-trash'></i>
+              </button>
+            </td>
+          </tr>`).join('');
+
+        container.innerHTML = `
+          <table class="sr-table">
+            <thead><tr>
+              <th>Campaign</th><th>Generated</th><th>Size</th><th>Actions</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+      } catch (e) {
+        container.innerHTML = `<div class="sr-empty" style="color:var(--error);">Failed to load reports: ${e.message}</div>`;
+      }
+    }
+    window.loadSavedReports = loadSavedReports;
+
+    async function downloadSavedReport(id, filename) {
+      try {
+        const api = window._API || 'http://127.0.0.1:8001';
+        const resp = await fetch(`${api}/final-report/reports/${id}/download`);
+        if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename; a.style.display = 'none';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+        showToast(`Downloaded: ${filename}`, 'success');
+      } catch (e) {
+        showToast(e.message || 'Download failed', 'error');
+      }
+    }
+    window.downloadSavedReport = downloadSavedReport;
+
+    async function deleteSavedReport(id) {
+      if (!confirm('Delete this report from the database?')) return;
+      try {
+        const api = window._API || 'http://127.0.0.1:8001';
+        const resp = await fetch(`${api}/final-report/reports/${id}`, { method: 'DELETE' });
+        if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+        showToast('Report deleted', 'success');
+        loadSavedReports();
+      } catch (e) {
+        showToast(e.message || 'Delete failed', 'error');
+      }
+    }
+    window.deleteSavedReport = deleteSavedReport;
+
+    // Auto-load saved reports on page open
+    loadSavedReports();
+
+    // ── Backend health ─────────────────────────────────────────────────
+    async function checkBackend() {
+      const el = document.getElementById('backend-status');
+      try {
+        const api = window._API || 'http://127.0.0.1:8001';
+        const r = await fetch(`${api}/health`, { signal: AbortSignal.timeout(3000) });
+        if (r.ok) { el.textContent = 'Local Backend'; el.style.color = 'var(--success)'; }
+        else throw new Error();
+      } catch { el.textContent = 'Backend Offline'; el.style.color = 'var(--error)'; }
+    }
+    setTimeout(checkBackend, 500);
+  </script>
+  <script>
+    (function() {
+      const token = localStorage.getItem('access_token');
+      if (!token) { window.location.href = 'login.html'; return; }
+
+      const role         = localStorage.getItem('user_role') || '';
+      const pagesRaw     = localStorage.getItem('allowed_pages');
+      const allowedPages = pagesRaw ? JSON.parse(pagesRaw) : null;
+      if (allowedPages !== null && !allowedPages.includes('final_report')) {
+        window.location.href = 'login.html'; return;
+      }
+
+      const username = localStorage.getItem('username') || '';
+      const uEl = document.getElementById('sidebarUsername');
+      const rEl = document.getElementById('sidebarRole');
+      if (uEl) uEl.textContent = username;
+      if (rEl) rEl.textContent = role.replace('_', ' ');
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('user_role');
+          localStorage.removeItem('username');
+          localStorage.removeItem('allowed_pages');
+          window.location.href = 'login.html';
+        });
+      }
+    })();
+  </script>
+</body>
+
+</html>

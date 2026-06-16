@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRM Excel Processor — AdVision AI</title>
+  <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+  <link rel="stylesheet" href="style.css?v=3">
+  <style>
+    /* ── CRM-specific styles ── */
+    .crm-wrap {
+      margin-left: var(--sidebar-w);
+      padding: 28px 32px;
+      min-height: 100vh;
+    }
+
+    /* Full-width mode when sidebar is hidden (restricted admin) */
+    body.no-sidebar .crm-wrap {
+      margin-left: 0 !important;
+      padding: 28px 40px;     /* same comfortable padding on all 4 tabs */
+    }
+    body.no-sidebar #crm-sidebar {
+      display: none !important;
+    }
+
+    /* Tabs */
+    .crm-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 28px;
+    }
+
+    .crm-tab {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 11px 22px;
+      font-size: 0.84rem;
+      font-weight: 500;
+      color: var(--text-sec);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.18s;
+      user-select: none;
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+    }
+
+    .crm-tab:hover {
+      color: var(--text);
+    }
+
+    .crm-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .crm-tab i {
+      font-size: 1rem;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    /* Cards */
+    .crm-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 20px;
+    }
+
+    .crm-card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .crm-card-sub {
+      font-size: 0.78rem;
+      color: var(--text-sec);
+      margin-bottom: 20px;
+    }
+
+    /* Upload zone */
+    .upload-zone {
+      border: 1.5px dashed rgba(99, 102, 241, 0.35);
+      border-radius: 10px;
+      padding: 48px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(99, 102, 241, 0.03);
+      position: relative;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.drag-over {
+      border-color: var(--accent);
+      background: rgba(99, 102, 241, 0.07);
+    }
+
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .upload-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(99, 102, 241, 0.12);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+      font-size: 22px;
+      color: var(--accent);
+    }
+
+    .upload-text {
+      font-size: 0.9rem;
+      color: var(--text);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .upload-sub {
+      font-size: 0.75rem;
+      color: var(--text-sec);
+    }
+
+    .upload-filename {
+      display: none;
+      margin-top: 14px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.8rem;
+      color: var(--accent);
+      display: none;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .upload-filename.show {
+      display: flex;
+    }
+
+    /* Process button */
+    .btn-process {
+      margin-top: 18px;
+      background: var(--grad);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 24px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.2s;
+    }
+
+    .btn-process:hover {
+      opacity: 0.88;
+    }
+
+    .btn-process:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* How it works */
+    .how-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 4px;
+    }
+
+    .how-card {
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .how-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .how-card-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 5px;
+    }
+
+    .how-card-desc {
+      font-size: 0.73rem;
+      color: var(--text-sec);
+      line-height: 1.5;
+    }
+
+    /* Form fields */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-row.single {
+      grid-template-columns: 1fr;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-sec);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .form-label .badge-opt {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 5px;
+    }
+
+    .form-input {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: var(--text);
+      font-size: 0.82rem;
+      outline: none;
+      transition: border-color 0.15s;
+      width: 100%;
+    }
+
+    .form-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .form-input:focus {
+      border-color: rgba(99, 102, 241, 0.5);
+    }
+
+    .form-hint {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Range section header */
+    .range-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin: 18px 0 12px;
+    }
+
+    .range-section i {
+      font-size: 0.9rem;
+    }
+
+    /* Rule entry box */
+    .rule-entry {
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    .rule-entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .rule-entry-num {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .btn-remove-rule {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-remove-rule:hover {
+      background: rgba(239, 68, 68, 0.15);
+    }
+
+    /* Add More / Add Rule buttons */
+    .btn-add-more {
+      background: transparent;
+      border: 1.5px dashed rgba(99, 102, 241, 0.4);
+      color: var(--accent);
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+      margin-right: 10px;
+    }
+
+    .btn-add-more:hover {
+      background: rgba(99, 102, 241, 0.07);
+      border-color: var(--accent);
+    }
+
+    .btn-add-rule {
+      background: var(--grad);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: opacity 0.15s;
+    }
+
+    .btn-add-rule:hover {
+      opacity: 0.87;
+    }
+
+    /* Saved rules table */
+    .rules-table-wrap {
+      margin-top: 6px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .rules-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .rules-table th {
+      background: rgba(99, 102, 241, 0.07);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-sec);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .rules-table td {
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      color: var(--text);
+      border-bottom: 1px solid rgba(99, 102, 241, 0.05);
+    }
+
+    .rules-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .rules-table tr:hover td {
+      background: var(--bg-hover);
+    }
+
+    .btn-del-rule {
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.18);
+      color: #ef4444;
+      border-radius: 5px;
+      padding: 3px 8px;
+      font-size: 0.7rem;
+      cursor: pointer;
+    }
+
+    .empty-rules {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    /* Settings */
+    .settings-section {
+      margin-bottom: 24px;
+    }
+
+    .settings-section-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .settings-section-title i {
+      font-size: 0.95rem;
+    }
+
+    .btn-save-settings {
+      background: var(--grad);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 24px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: opacity 0.15s;
+    }
+
+    .btn-save-settings:hover {
+      opacity: 0.87;
+    }
+
+    /* Toast */
+    .crm-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-size: 0.82rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 9999;
+    }
+
+    .crm-toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .crm-toast.success i {
+      color: var(--success);
+    }
+
+    .crm-toast.error i {
+      color: var(--error);
+    }
+
+    .crm-toast.info i {
+      color: var(--accent);
+    }
+
+    /* Download result */
+    .download-result {
+      display: none;
+      margin-top: 16px;
+      background: rgba(16, 185, 129, 0.07);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 10px;
+      padding: 14px 18px;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .download-result.show {
+      display: flex;
+    }
+
+    .dl-icon {
+      font-size: 28px;
+      color: var(--success);
+    }
+
+    .dl-info {
+      flex: 1;
+    }
+
+    .dl-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .dl-meta {
+      font-size: 0.73rem;
+      color: var(--text-sec);
+      margin-top: 2px;
+    }
+
+    .btn-download {
+      background: var(--success);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+
+    .btn-download:hover {
+      opacity: 0.87;
+    }
+
+    /* Ad-type badges */
+    .badge-video  { background:rgba(139,92,246,0.15); color:#8b5cf6; border:1px solid rgba(139,92,246,0.3);
+                    font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:20px;
+                    display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }
+    .badge-banner { background:rgba(16,185,129,0.12); color:#10b981;  border:1px solid rgba(16,185,129,0.25);
+                    font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:20px;
+                    display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }
+
+    /* Date-group header row inside processed-files table */
+    .date-group-row td {
+      background: rgba(99,102,241,0.07);
+      color: var(--accent);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 7px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    @media (max-width: 900px) {
+      .how-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══════ SIDEBAR ═══════ -->
+  <aside class="sidebar" id="crm-sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon"><i class='bx bx-film'></i></div>
+      <div>
+        <div class="logo-name">AdVision AI</div>
+        <div class="logo-sub">Ad Injector Platform</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">MAIN</div>
+      <a href="index.html" class="nav-item"><i class='bx bxs-dashboard'></i> Dashboard</a>
+      <a href="ppt-store.html" class="nav-item"><i class='bx bx-broadcast'></i> PPT Store</a>
+      <a href="#" class="nav-item"><i class='bx bx-link'></i> URL Manager</a>
+      <a href="#" class="nav-item"><i class='bx bx-image'></i> Image Manager</a>
+      <a href="#" class="nav-item"><i class='bx bx-shield'></i> VPN Manager</a>
+      <a href="#" class="nav-item"><i class='bx bx-task'></i> Tasks</a>
+      <div class="nav-label">ANALYTICS</div>
+      <a href="#" class="nav-item"><i class='bx bx-bar-chart-alt-2'></i> Reports</a>
+      <a href="#" class="nav-item"><i class='bx bx-history'></i> Activity Logs</a>
+      <div class="nav-label">SYSTEM</div>
+      <a href="crm-excel.html" class="nav-item active"><i class='bx bx-credit-card'></i> CRM Excel Processor</a>
+      <a href="#" class="nav-item"><i class='bx bx-key'></i> Final Report</a>
+      <a href="#" class="nav-item"><i class='bx bx-support'></i> Reach Report</a>
+      <a href="#" class="nav-item"><i class='bx bx-cog'></i> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sys-status-row">
+        <span class="dot-green"></span>
+        <div>
+          <div class="sys-status-title">System Status</div>
+          <div id="backend-status" class="sys-status-sub">Checking...</div>
+        </div>
+      </div>
+      <div class="version-txt">Version 2.1.0</div>
+    </div>
+  </aside>
+
+  <!-- ═══════ MAIN ═══════ -->
+  <div class="crm-wrap" id="crm-wrap">
+
+    <!-- Header -->
+    <header class="top-header" style="margin-left:0; position:static; border-radius:12px; margin-bottom:24px;">
+      <div class="page-title-block">
+        <h1 class="page-h1">CRM Excel Processor</h1>
+        <p class="page-sub">Auto-calculate CTR, VCR and Viewability from your campaign Excel file</p>
+      </div>
+      <!-- Shown only when sidebar is hidden (restricted admin) -->
+      <div id="header-user-area" style="display:none; align-items:center; gap:10px; margin-left:auto;">
+        <i class='bx bx-user-circle' style="font-size:1.4rem; color:#6366f1;"></i>
+        <div>
+          <div id="headerUsername" style="font-size:0.8rem; font-weight:600; color:#e3e3e8;">—</div>
+          <div id="headerRole" style="font-size:0.7rem; color:#6b7280; text-transform:capitalize;">—</div>
+        </div>
+        <button id="headerLogoutBtn" title="Logout"
+          style="background:rgba(99,102,241,0.12); border:1px solid rgba(99,102,241,0.25); color:#6366f1;
+                 border-radius:8px; padding:6px 14px; font-size:0.78rem; font-weight:600; cursor:pointer;
+                 display:flex; align-items:center; gap:5px;">
+          <i class='bx bx-log-out'></i> Logout
+        </button>
+      </div>
+    </header>
+
+    <!-- Tabs -->
+    <div class="crm-tabs">
+      <button class="crm-tab active" data-tab="upload">
+        <i class='bx bx-upload'></i> Upload &amp; Process
+      </button>
+      <button class="crm-tab" data-tab="rules" onclick="loadCampaignRules()">
+        <i class='bx bx-list-ul'></i> Campaign Rules
+      </button>
+      <button class="crm-tab" data-tab="settings">
+        <i class='bx bx-cog'></i> Settings
+      </button>
+      <button class="crm-tab" data-tab="files" onclick="loadProcessedFiles()">
+        <i class='bx bx-folder-open'></i> Processed Files
+      </button>
+    </div>
+
+    <!-- ══════ TAB 1: Upload & Process ══════ -->
+    <div class="tab-panel active" id="tab-upload">
+
+      <div class="crm-card">
+        <div class="crm-card-title">Upload &amp; Process File</div>
+        <div class="crm-card-sub">Upload your Excel or CSV file. CTR, Video Completion Rate, and Viewability are
+          auto-calculated.</div>
+
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" id="file-input" accept=".xlsx,.xls,.csv">
+          <div class="upload-icon"><i class='bx bx-upload'></i></div>
+          <div class="upload-text">Drag &amp; drop your file here, or click to browse</div>
+          <div class="upload-sub">Supports .xlsx · .xls · .csv</div>
+        </div>
+
+        <div class="upload-filename" id="filename-chip">
+          <i class='bx bx-file-blank'></i>
+          <span id="filename-label">—</span>
+          <button onclick="clearFile()"
+            style="background:none;border:none;color:var(--text-muted);cursor:pointer;margin-left:4px;"><i
+              class='bx bx-x'></i></button>
+        </div>
+
+        <div style="margin-top:18px;">
+          <button class="btn-process" id="btn-process" onclick="processFile()" disabled>
+            <i class='bx bx-zap'></i> Process File
+          </button>
+        </div>
+
+        <!-- Download result -->
+        <div class="download-result" id="download-result">
+          <i class='bx bx-file-blank dl-icon'></i>
+          <div class="dl-info">
+            <div class="dl-name" id="dl-filename">processed_output.xlsx</div>
+            <div class="dl-meta" id="dl-meta">Ready to download</div>
+          </div>
+          <a id="btn-dl" class="btn-download" href="#" download>
+            <i class='bx bx-download'></i> Download
+          </a>
+        </div>
+      </div>
+
+      <!-- How it works -->
+      <div class="crm-card">
+        <div class="crm-card-title">How it works</div>
+        <div class="crm-card-sub">What happens to your data on each run</div>
+        <div class="how-grid">
+          <div class="how-card">
+            <div class="how-icon" style="background:rgba(99,102,241,0.12);color:#6366f1;">
+              <i class='bx bx-calendar'></i>
+            </div>
+            <div class="how-card-title">Date normalisation</div>
+            <div class="how-card-desc">Excel serial dates → DD/MM/YYYY. All date columns auto-detected and converted.
+            </div>
+          </div>
+          <div class="how-card">
+            <div class="how-icon" style="background:rgba(16,185,129,0.12);color:#10b981;">
+              <i class='bx bx-mouse-alt'></i>
+            </div>
+            <div class="how-card-title">CTR calculation</div>
+            <div class="how-card-desc">Clicks ÷ Impressions × 100. Clamped to global CTR range and deduped against
+              yesterday.</div>
+          </div>
+          <div class="how-card">
+            <div class="how-icon" style="background:rgba(245,158,11,0.12);color:#f59e0b;">
+              <i class='bx bx-film'></i>
+            </div>
+            <div class="how-card-title">Video metrics</div>
+            <div class="how-card-desc">VCR = Completions ÷ Starts × 100. Kept within campaign or global 75–89% range.
+            </div>
+          </div>
+          <div class="how-card">
+            <div class="how-icon" style="background:rgba(139,92,246,0.12);color:#8b5cf6;">
+              <i class='bx bx-show'></i>
+            </div>
+            <div class="how-card-title">Viewability</div>
+            <div class="how-card-desc">Viewable ÷ Measurable × 100. Campaign-specific or global 75–89% fallback applied.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ TAB 2: Campaign Rules ══════ -->
+    <div class="tab-panel" id="tab-rules">
+      <div class="crm-card">
+        <div class="crm-card-title">Add Campaign Rule</div>
+        <div class="crm-card-sub">Set custom CTR, VCR and Viewability ranges per campaign. Leave a range empty to fall
+          back to the global default. Click "+ Add More" to add multiple rules at once.</div>
+
+        <div id="rule-entries">
+          <!-- Rule entry dynamically inserted -->
+        </div>
+
+        <div style="margin-top:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <button class="btn-add-more" onclick="addRuleEntry()">+ Add More</button>
+          <button class="btn-add-rule" id="btn-save-rule" onclick="saveRules()"><i class='bx bx-plus'></i> Add
+            Rule</button>
+          <button class="btn-add-more" id="btn-cancel-edit" onclick="cancelEdit()"
+            style="display:none;border-color:rgba(239,68,68,0.4);color:#ef4444;">
+            <i class='bx bx-x'></i> Cancel Edit
+          </button>
+        </div>
+      </div>
+
+      <!-- Saved rules list -->
+      <div class="crm-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <div>
+            <div class="crm-card-title">Campaign Rules</div>
+            <div class="crm-card-sub">Per-campaign VCR and Viewability overrides. Loaded from
+              <strong>ctr_db.campaign_rules</strong></div>
+          </div>
+          <button class="btn-add-more" onclick="loadCampaignRules()" style="margin:0;">
+            <i class='bx bx-refresh'></i> Refresh
+          </button>
+        </div>
+
+        <div class="rules-table-wrap">
+          <table class="rules-table">
+            <thead>
+              <tr>
+                <th>Campaign</th>
+                <th>Line Item ID</th>
+                <th>CTR Min–Max %</th>
+                <th>VCR Min–Max %</th>
+                <th>View. Min–Max %</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="rules-tbody">
+              <tr>
+                <td colspan="6" class="empty-rules">No rules added yet. Add a rule above.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ TAB 3: Settings ══════ -->
+    <div class="tab-panel" id="tab-settings">
+      <div class="crm-card">
+        <div class="crm-card-title">Global Defaults</div>
+        <div class="crm-card-sub">These ranges apply to all campaigns unless a Campaign Rule overrides them.</div>
+
+        <div class="settings-section">
+          <div class="settings-section-title"><i class='bx bx-mouse-alt'></i> Click-Through Rate (CTR)</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Global CTR Min %</label>
+              <input class="form-input" id="g-ctr-min" type="number" step="0.01" placeholder="e.g. 0.10" value="0.10">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Global CTR Max %</label>
+              <input class="form-input" id="g-ctr-max" type="number" step="0.01" placeholder="e.g. 0.55" value="0.55">
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-title"><i class='bx bx-film'></i> Video Completion Rate (VCR)</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Global VCR Min %</label>
+              <input class="form-input" id="g-vcr-min" type="number" step="1" placeholder="e.g. 75" value="75">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Global VCR Max %</label>
+              <input class="form-input" id="g-vcr-max" type="number" step="1" placeholder="e.g. 89" value="89">
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-title"><i class='bx bx-show'></i> Viewability</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Global Viewability Min %</label>
+              <input class="form-input" id="g-view-min" type="number" step="1" placeholder="e.g. 75" value="75">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Global Viewability Max %</label>
+              <input class="form-input" id="g-view-max" type="number" step="1" placeholder="e.g. 89" value="89">
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-save-settings" onclick="saveSettings()">
+          <i class='bx bx-save'></i> Save Settings
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════ TAB 4: Processed Files ══════ -->
+    <div class="tab-panel" id="tab-files">
+      <div class="crm-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <div>
+            <div class="crm-card-title">Processed Files</div>
+            <div class="crm-card-sub">All files processed through this tool, stored in the database.</div>
+          </div>
+          <button class="btn-add-more" onclick="loadProcessedFiles()" style="margin:0;">
+            <i class='bx bx-refresh'></i> Refresh
+          </button>
+        </div>
+
+        <div class="rules-table-wrap" style="margin-top:16px;">
+          <table class="rules-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Original File</th>
+                <th>Saved As</th>
+                <th>Type</th>
+                <th>Processed At</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="files-tbody">
+              <tr>
+                <td colspan="6" class="empty-rules">Loading...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /crm-wrap -->
+
+  <!-- Toast -->
+  <div class="crm-toast" id="crm-toast">
+    <i class='bx bx-check-circle'></i>
+    <span id="toast-msg">Done</span>
+  </div>
+
+  <script type="module">
+    import { API_BASE_URL } from './src/config/apiConfig.js';
+    window._API = API_BASE_URL;
+  </script>
+
+  <script>
+    // ── State ────────────────────────────────────────────────────────
+    let selectedFile = null;
+    let dbRules = [];          // rules loaded from ctr_db (used for display + process payload)
+    let settings = JSON.parse(localStorage.getItem('crm_settings') || JSON.stringify({
+      ctrMin: 0.10, ctrMax: 0.55,
+      vcrMin: 75, vcrMax: 89,
+      viewMin: 75, viewMax: 89,
+    }));
+
+    // ── Toast ────────────────────────────────────────────────────────
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('crm-toast');
+      const icons = { success: 'bx-check-circle', error: 'bx-error-circle', info: 'bx-info-circle' };
+      t.className = `crm-toast ${type}`;
+      t.querySelector('i').className = `bx ${icons[type] || icons.success}`;
+      document.getElementById('toast-msg').textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3200);
+    }
+
+    // ── Tabs ─────────────────────────────────────────────────────────
+    document.querySelectorAll('.crm-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.crm-tab').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        if (btn.dataset.tab === 'files') loadProcessedFiles();
+        if (btn.dataset.tab === 'rules') loadCampaignRules();
+      });
+    });
+
+    // ── File upload ───────────────────────────────────────────────────
+    const zone = document.getElementById('upload-zone');
+    const input = document.getElementById('file-input');
+
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); zone.classList.remove('drag-over');
+      const f = e.dataTransfer.files[0];
+      if (f) setFile(f);
+    });
+    input.addEventListener('change', () => { if (input.files[0]) setFile(input.files[0]); });
+
+    function setFile(f) {
+      const ext = f.name.split('.').pop().toLowerCase();
+      if (!['xlsx', 'xls', 'csv'].includes(ext)) {
+        showToast('Only .xlsx, .xls, .csv files allowed', 'error'); return;
+      }
+      selectedFile = f;
+      document.getElementById('filename-label').textContent = f.name;
+      document.getElementById('filename-chip').classList.add('show');
+      document.getElementById('btn-process').disabled = false;
+      document.getElementById('download-result').classList.remove('show');
+    }
+
+    function clearFile() {
+      selectedFile = null;
+      input.value = '';
+      document.getElementById('filename-chip').classList.remove('show');
+      document.getElementById('btn-process').disabled = true;
+      document.getElementById('download-result').classList.remove('show');
+    }
+
+    // ── Process ───────────────────────────────────────────────────────
+    async function processFile() {
+      if (!selectedFile) return;
+      const btn = document.getElementById('btn-process');
+      btn.disabled = true;
+      btn.innerHTML = `<i class='bx bx-loader-alt bx-spin'></i> Processing...`;
+
+      try {
+        // Convert DB rules to the format the backend process endpoint expects
+        const rulesPayload = dbRules.map(r => ({
+          campaign: r.campaign_name || '',
+          line_id: r.line_item_id || '',
+          ctr_min: r.min_ctr,
+          ctr_max: r.max_ctr,
+          vcr_min: r.min_vcr,
+          vcr_max: r.max_vcr,
+          view_min: r.min_viewability,
+          view_max: r.max_viewability,
+        }));
+
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        formData.append('rules', JSON.stringify(rulesPayload));
+        formData.append('settings', JSON.stringify({
+          ctr_min: settings.ctrMin,
+          ctr_max: settings.ctrMax,
+          vcr_min: settings.vcrMin,
+          vcr_max: settings.vcrMax,
+          view_min: settings.viewMin,
+          view_max: settings.viewMax,
+        }));
+
+        const api = window._API || 'http://127.0.0.1:8001';
+        const resp = await fetch(`${api}/crm/process`, {
+          method: 'POST', body: formData,
+        });
+
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          throw new Error(err.message || `Server error ${resp.status}`);
+        }
+
+        const blob = await resp.blob();
+        const url  = URL.createObjectURL(blob);
+
+        // Detect whether backend returned a ZIP (multi-sheet) or CSV (single sheet)
+        const contentType = resp.headers.get('content-type') || '';
+        const isZip = contentType.includes('zip');
+        const stem  = selectedFile.name.replace(/\.[^.]+$/, '');
+        const outName = isZip
+          ? `processed_${stem}.zip`
+          : `processed_${stem}.csv`;
+
+        const dlIcon = document.querySelector('#download-result .dl-icon');
+        if (dlIcon) dlIcon.className = isZip ? 'bx bx-archive dl-icon' : 'bx bx-file-blank dl-icon';
+
+        document.getElementById('dl-filename').textContent = outName;
+        document.getElementById('dl-meta').textContent =
+          `${(blob.size / 1024).toFixed(1)} KB · ${new Date().toLocaleTimeString()}` +
+          (isZip ? ' · Multiple sheets — check Processed Files tab for individual downloads' : '');
+        const dlBtn = document.getElementById('btn-dl');
+        dlBtn.href = url; dlBtn.download = outName;
+        document.getElementById('download-result').classList.add('show');
+
+        // Refresh processed files list so new entries appear immediately
+        if (document.getElementById('tab-files').classList.contains('active')) {
+          loadProcessedFiles();
+        }
+
+        showToast(
+          isZip ? 'Processed! Multiple sheets → ZIP downloaded.' : 'File processed successfully!',
+          'success'
+        );
+      } catch (e) {
+        showToast(e.message || 'Processing failed', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class='bx bx-zap'></i> Process File`;
+      }
+    }
+    window.processFile = processFile;
+
+    // ── Campaign Rules (DB-backed) ────────────────────────────────────
+    let entryCount = 0;
+    let _editingId = null;   // null = create mode, number = edit mode
+
+    function ruleEntryHTML(n) {
+      return `
+        <div class="rule-entry" id="entry-${n}">
+          <div class="rule-entry-header">
+            <span class="rule-entry-num">Rule ${n}</span>
+            ${n > 1 ? `<button class="btn-remove-rule" onclick="removeEntry(${n})"><i class='bx bx-trash'></i> Remove</button>` : ''}
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Campaign <span style="color:var(--error)">*</span></label>
+              <input class="form-input" id="e${n}-campaign" placeholder="CA01201"
+                title="Exact name from the Campaign column. Multiple: comma-separated. Case-insensitive.">
+              <span class="form-hint">Exact name from "Campaign" column. Comma-separate for multiple.</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Line Item ID <span class="badge-opt">optional</span></label>
+              <input class="form-input" id="e${n}-lineid" placeholder="Line Item ID for notes/label">
+              <span class="form-hint">Reference Line Item ID for this campaign rule.</span>
+            </div>
+          </div>
+
+          <div class="range-section"><i class='bx bx-mouse-alt'></i> Click-Through Rate (CTR) Range</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">CTR Min % <span class="badge-opt">optional</span></label>
+              <input class="form-input" id="e${n}-ctr-min" type="number" step="0.01" placeholder="e.g. 0.37">
+              <span class="form-hint">Leave empty → uses global CTR min</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">CTR Max % <span class="badge-opt">optional</span></label>
+              <input class="form-input" id="e${n}-ctr-max" type="number" step="0.01" placeholder="e.g. 0.55">
+              <span class="form-hint">Leave empty → uses global CTR max</span>
+            </div>
+          </div>
+
+          <div class="range-section"><i class='bx bx-film'></i> Video Completion Rate (VCR) Range</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">VCR Min % <span class="badge-opt">optional</span></label>
+              <input class="form-input" id="e${n}-vcr-min" type="number" step="1" placeholder="e.g. 75">
+              <span class="form-hint">Leave empty → fallback 75%</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">VCR Max % <span class="badge-opt">optional</span></label>
+              <input class="form-input" id="e${n}-vcr-max" type="number" step="1" placeholder="e.g. 89">
+              <span class="form-hint">Leave empty → fallback 89%</span>
+            </div>
+          </div>
+
+          <div class="range-section"><i class='bx bx-show'></i> Viewability Range</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Viewability Min % <span class="badge-opt">optional</span></label>
+              <input class="form-input" id="e${n}-view-min" type="number" step="1" placeholder="e.g. 75">
+              <span class="form-hint">Leave empty → fallback 75%</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Viewability Max % <span class="badge-opt">optional</span></label>
+              <input class="form-input" id="e${n}-view-max" type="number" step="1" placeholder="e.g. 89">
+              <span class="form-hint">Leave empty → fallback 89%</span>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function addRuleEntry() {
+      entryCount++;
+      const wrap = document.getElementById('rule-entries');
+      wrap.insertAdjacentHTML('beforeend', ruleEntryHTML(entryCount));
+    }
+    window.addRuleEntry = addRuleEntry;
+
+    function removeEntry(n) {
+      document.getElementById('entry-' + n)?.remove();
+    }
+    window.removeEntry = removeEntry;
+
+    /** Load campaign_rules from ctr_db and render table */
+    async function loadCampaignRules() {
+      const tbody = document.getElementById('rules-tbody');
+      tbody.innerHTML = `<tr><td colspan="6" class="empty-rules"><i class='bx bx-loader-alt bx-spin'></i> Loading from database...</td></tr>`;
+      try {
+        const api = window._API || 'http://127.0.0.1:8001';
+        const resp = await fetch(`${api}/crm/rules`);
+        if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+        dbRules = await resp.json();
+        renderRulesTable();
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="6" class="empty-rules" style="color:var(--error);">Could not load rules — is the backend running?</td></tr>`;
+      }
+    }
+    window.loadCampaignRules = loadCampaignRules;
+
+    /** Save / Update rules */
+    async function saveRules() {
+      const entries = document.querySelectorAll('.rule-entry');
+      const toSave = [];
+      let valid = true;
+
+      entries.forEach(entry => {
+        const n = entry.id.replace('entry-', '');
+        const campaign = document.getElementById(`e${n}-campaign`)?.value.trim();
+        if (!campaign) { valid = false; return; }
+        toSave.push({
+          campaign,
+          line_id: document.getElementById(`e${n}-lineid`)?.value.trim() || null,
+          ctr_min: parseFloat(document.getElementById(`e${n}-ctr-min`)?.value) || null,
+          ctr_max: parseFloat(document.getElementById(`e${n}-ctr-max`)?.value) || null,
+          vcr_min: parseFloat(document.getElementById(`e${n}-vcr-min`)?.value) || null,
+          vcr_max: parseFloat(document.getElementById(`e${n}-vcr-max`)?.value) || null,
+          view_min: parseFloat(document.getElementById(`e${n}-view-min`)?.value) || null,
+          view_max: parseFloat(document.getElementById(`e${n}-view-max`)?.value) || null,
+        });
+      });
+
+      if (!valid) { showToast('Campaign name is required', 'error'); return; }
+      if (!toSave.length) { showToast('No rule entries found', 'error'); return; }
+
+      try {
+        const api = window._API || 'http://127.0.0.1:8001';
+
+        if (_editingId !== null) {
+          // ── UPDATE existing rule ──
+          const resp = await fetch(`${api}/crm/rules/${_editingId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(toSave[0]),
+          });
+          if (!resp.ok) { const e = await resp.json().catch(() => ({})); throw new Error(e.detail || `Error ${resp.status}`); }
+          showToast('Rule updated in database', 'success');
+        } else {
+          // ── CREATE new rules ──
+          for (const rule of toSave) {
+            const resp = await fetch(`${api}/crm/rules`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(rule),
+            });
+            if (!resp.ok) { const e = await resp.json().catch(() => ({})); throw new Error(e.detail || `Error ${resp.status}`); }
+          }
+          showToast(`${toSave.length} rule(s) saved to database`, 'success');
+        }
+
+        _resetRuleForm();
+        await loadCampaignRules();
+      } catch (e) {
+        showToast(e.message || 'Failed to save rules', 'error');
+      }
+    }
+    window.saveRules = saveRules;
+
+    function _resetRuleForm() {
+      _editingId = null;
+      document.getElementById('rule-entries').innerHTML = '';
+      entryCount = 0;
+      addRuleEntry();
+      // Reset button labels
+      document.getElementById('btn-save-rule').innerHTML = `<i class='bx bx-plus'></i> Add Rule`;
+      const cancelBtn = document.getElementById('btn-cancel-edit');
+      if (cancelBtn) cancelBtn.style.display = 'none';
+    }
+
+    function cancelEdit() {
+      _resetRuleForm();
+      showToast('Edit cancelled', 'info');
+    }
+    window.cancelEdit = cancelEdit;
+
+    /** Pre-fill form with existing rule for editing */
+    function editRule(ruleId) {
+      const r = dbRules.find(x => x.id === ruleId);
+      if (!r) return;
+
+      _editingId = ruleId;
+
+      // Reset to single entry
+      document.getElementById('rule-entries').innerHTML = '';
+      entryCount = 0;
+      addRuleEntry();
+      const n = 1;
+
+      document.getElementById(`e${n}-campaign`).value = r.campaign_name || '';
+      document.getElementById(`e${n}-lineid`).value = r.line_item_id || '';
+      document.getElementById(`e${n}-ctr-min`).value = r.min_ctr ?? '';
+      document.getElementById(`e${n}-ctr-max`).value = r.max_ctr ?? '';
+      document.getElementById(`e${n}-vcr-min`).value = r.min_vcr ?? '';
+      document.getElementById(`e${n}-vcr-max`).value = r.max_vcr ?? '';
+      document.getElementById(`e${n}-view-min`).value = r.min_viewability ?? '';
+      document.getElementById(`e${n}-view-max`).value = r.max_viewability ?? '';
+
+      // Update button labels
+      document.getElementById('btn-save-rule').innerHTML = `<i class='bx bx-save'></i> Update Rule`;
+      const cancelBtn = document.getElementById('btn-cancel-edit');
+      if (cancelBtn) cancelBtn.style.display = 'inline-flex';
+
+      // Scroll to form
+      document.getElementById('rule-entries').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      showToast(`Editing rule: ${r.campaign_name || r.line_item_id}`, 'info');
+    }
+    window.editRule = editRule;
+
+    /** Delete a rule from ctr_db by its DB id */
+    async function deleteRule(ruleId) {
+      try {
+        const api = window._API || 'http://127.0.0.1:8001';
+        const resp = await fetch(`${api}/crm/rules/${ruleId}`, { method: 'DELETE' });
+        if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+        await loadCampaignRules();
+        showToast('Rule deleted from database', 'info');
+      } catch (e) {
+        showToast(e.message || 'Failed to delete rule', 'error');
+      }
+    }
+    window.deleteRule = deleteRule;
+
+    function renderRulesTable() {
+      const tbody = document.getElementById('rules-tbody');
+      if (!dbRules.length) {
+        tbody.innerHTML = `<tr><td colspan="6" class="empty-rules">No rules in database yet. Add a rule above.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = dbRules.map(r => `
+        <tr>
+          <td>${r.campaign_name || '—'}</td>
+          <td>${r.line_item_id || '—'}</td>
+          <td>${r.min_ctr ?? '—'} – ${r.max_ctr ?? '—'}</td>
+          <td>${r.min_vcr ?? '—'} – ${r.max_vcr ?? '—'}</td>
+          <td>${r.min_viewability ?? '—'} – ${r.max_viewability ?? '—'}</td>
+          <td style="display:flex;gap:6px;align-items:center;">
+            <button class="btn-del-rule" onclick="editRule(${r.id})"
+              style="background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.2);color:var(--accent);">
+              <i class='bx bx-edit'></i> Edit
+            </button>
+            <button class="btn-del-rule" onclick="deleteRule(${r.id})"><i class='bx bx-trash'></i></button>
+          </td>
+        </tr>`).join('');
+    }
+
+    // ── Settings ─────────────────────────────────────────────────────
+    function saveSettings() {
+      settings = {
+        ctrMin: parseFloat(document.getElementById('g-ctr-min').value) || 0.10,
+        ctrMax: parseFloat(document.getElementById('g-ctr-max').value) || 0.55,
+        vcrMin: parseFloat(document.getElementById('g-vcr-min').value) || 75,
+        vcrMax: parseFloat(document.getElementById('g-vcr-max').value) || 89,
+        viewMin: parseFloat(document.getElementById('g-view-min').value) || 75,
+        viewMax: parseFloat(document.getElementById('g-view-max').value) || 89,
+      };
+      localStorage.setItem('crm_settings', JSON.stringify(settings));
+      showToast('Global settings saved', 'success');
+    }
+    window.saveSettings = saveSettings;
+
+    function loadSettings() {
+      document.getElementById('g-ctr-min').value = settings.ctrMin;
+      document.getElementById('g-ctr-max').value = settings.ctrMax;
+      document.getElementById('g-vcr-min').value = settings.vcrMin;
+      document.getElementById('g-vcr-max').value = settings.vcrMax;
+      document.getElementById('g-view-min').value = settings.viewMin;
+      document.getElementById('g-view-max').value = settings.viewMax;
+    }
+
+    // Backend health
+    async function checkBackend() {
+      const el = document.getElementById('backend-status');
+      try {
+        const api = window._API || 'http://127.0.0.1:8001';
+        const r = await fetch(`${api}/health`, { signal: AbortSignal.timeout(3000) });
+        if (r.ok) { el.textContent = 'Local Backend'; el.style.color = 'var(--success)'; }
+        else throw new Error();
+      } catch { el.textContent = 'Backend Offline'; el.style.color = 'var(--error)'; }
+    }
+
+    // ── Processed Files ───────────────────────────────────────────────
+    function _dateGroup(isoStr) {
+      if (!isoStr) return 'Unknown';
+      const now   = new Date();
+      const d     = new Date(isoStr);
+      const todayStart     = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const yesterdayStart = new Date(todayStart - 86400000);
+      const weekStart      = new Date(todayStart - 6 * 86400000);  // last 7 days
+
+      if (d >= todayStart)     return 'Today';
+      if (d >= yesterdayStart) return 'Yesterday';
+      if (d >= weekStart)      return 'This Week';
+      return 'Older';
+    }
+
+    function _fileRow(f) {
+      const dt = f.processed_at
+        ? new Date(f.processed_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
+        : '—';
+      const dlBtn = f.downloadable
+        ? `<button class="btn-download" style="padding:5px 12px;font-size:0.74rem;border:none;cursor:pointer;"
+               onclick="downloadFileById(${f.id})">
+               <i class='bx bx-download'></i> Download
+             </button>`
+        : `<span title="Re-process the file to enable download"
+               style="font-size:0.72rem;color:var(--text-muted);padding:4px 10px;
+                      border:1px solid var(--border);border-radius:6px;cursor:default;display:inline-block;">
+               <i class='bx bx-minus-circle'></i> Not saved
+             </span>`;
+      const adType = f.ad_type || 'Banner';
+      const typeBadge = adType === 'Video'
+        ? `<span class="badge-video"><i class='bx bx-play-circle'></i> Video</span>`
+        : `<span class="badge-banner"><i class='bx bx-image'></i> Banner</span>`;
+      return `<tr>
+        <td style="color:var(--text-muted);font-size:0.75rem;">${f.id}</td>
+        <td><i class='bx bx-file-blank' style='color:var(--text-muted);margin-right:6px;'></i>${f.original_filename || '—'}</td>
+        <td style="color:var(--accent);font-size:0.78rem;">${f.saved_filename || '—'}</td>
+        <td>${typeBadge}</td>
+        <td style="color:var(--text-sec);font-size:0.78rem;">${dt}</td>
+        <td>${dlBtn}</td>
+      </tr>`;
+    }
+
+    async function loadProcessedFiles() {
+      const tbody = document.getElementById('files-tbody');
+      tbody.innerHTML = `<tr><td colspan="6" class="empty-rules"><i class='bx bx-loader-alt bx-spin'></i> Loading...</td></tr>`;
+      try {
+        const api = window._API || 'http://127.0.0.1:8001';
+        const resp = await fetch(`${api}/crm/processed-files`);
+        if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+        const files = await resp.json();
+        if (!files.length) {
+          tbody.innerHTML = `<tr><td colspan="6" class="empty-rules">No processed files yet. Upload a file to get started.</td></tr>`;
+          return;
+        }
+
+        // Store filenames by id (avoids apostrophe issues in onclick)
+        window._fileMap = {};
+        files.forEach(f => { if (f.saved_filename) window._fileMap[f.id] = f.saved_filename; });
+
+        // Group by date bucket (newest first)
+        const GROUP_ORDER = ['Today', 'Yesterday', 'This Week', 'Older', 'Unknown'];
+        const groups = {};
+        GROUP_ORDER.forEach(g => { groups[g] = []; });
+        files.forEach(f => { groups[_dateGroup(f.processed_at)].push(f); });
+
+        let html = '';
+        GROUP_ORDER.forEach(label => {
+          const rows = groups[label];
+          if (!rows.length) return;
+          html += `<tr class="date-group-row">
+            <td colspan="6">
+              <i class='bx bx-calendar' style='margin-right:6px;'></i>${label}
+              <span style="margin-left:8px;font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0;">${rows.length} file${rows.length > 1 ? 's' : ''}</span>
+            </td>
+          </tr>`;
+          html += rows.map(_fileRow).join('');
+        });
+
+        tbody.innerHTML = html;
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="6" class="empty-rules" style="color:var(--error);">Could not load files — is the backend running?</td></tr>`;
+      }
+    }
+    window.loadProcessedFiles = loadProcessedFiles;
+
+    async function downloadFile(encodedName, displayName) {
+      try {
+        const api = window._API || 'http://127.0.0.1:8001';
+        const resp = await fetch(`${api}/crm/download/${encodedName}`);
+        if (resp.status === 404) {
+          showToast('File not available — it was processed before storage was enabled. Re-process the file to download.', 'error');
+          return;
+        }
+        if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = displayName;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+      } catch (e) {
+        showToast(e.message || 'Download failed', 'error');
+      }
+    }
+    window.downloadFile = downloadFile;
+
+    async function downloadFileById(fileId) {
+      const filename = window._fileMap && window._fileMap[fileId];
+      if (!filename) { showToast('File info missing', 'error'); return; }
+      await downloadFile(encodeURIComponent(filename), filename);
+    }
+    window.downloadFileById = downloadFileById;
+
+    // ── Init ─────────────────────────────────────────────────────────
+    addRuleEntry();
+    loadSettings();
+    setTimeout(checkBackend, 500);
+    // Pre-load DB rules so the process button can use them immediately
+    loadCampaignRules();
+  </script>
+  <script>
+    (function() {
+      const token = localStorage.getItem('access_token');
+      if (!token) { window.location.href = 'login.html'; return; }
+
+      // Page-level permission check
+      const role         = localStorage.getItem('user_role') || '';
+      const pagesRaw     = localStorage.getItem('allowed_pages');
+      const allowedPages = pagesRaw ? JSON.parse(pagesRaw) : null;
+      // null = super_admin (all access); list must include this page's key
+      if (allowedPages !== null && !allowedPages.includes('crm_excel')) {
+        window.location.href = 'login.html'; return;
+      }
+
+      const username = localStorage.getItem('username') || '';
+
+      // ── Sidebar: show only for super_admin (allowedPages === null) ──
+      const isRestricted = allowedPages !== null;
+      const sidebar  = document.getElementById('crm-sidebar');
+      const crmWrap  = document.getElementById('crm-wrap');
+
+      if (isRestricted) {
+        // Hide sidebar and expand all tab panels to full width via CSS class
+        document.body.classList.add('no-sidebar');
+
+        // Show user info + logout in header instead
+        const headerUserArea  = document.getElementById('header-user-area');
+        const headerUsername  = document.getElementById('headerUsername');
+        const headerRole      = document.getElementById('headerRole');
+        const headerLogoutBtn = document.getElementById('headerLogoutBtn');
+
+        if (headerUserArea) headerUserArea.style.display = 'flex';
+        if (headerUsername) headerUsername.textContent = username;
+        if (headerRole)     headerRole.textContent = role.replace('_', ' ');
+        if (headerLogoutBtn) {
+          headerLogoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('user_role');
+            localStorage.removeItem('username');
+            localStorage.removeItem('allowed_pages');
+            window.location.href = 'login.html';
+          });
+        }
+      } else {
+        // super_admin — populate sidebar user info
+        const uEl = document.getElementById('sidebarUsername');
+        const rEl = document.getElementById('sidebarRole');
+        if (uEl) uEl.textContent = username;
+        if (rEl) rEl.textContent = role.replace('_', ' ');
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('user_role');
+            localStorage.removeItem('username');
+            localStorage.removeItem('allowed_pages');
+            window.location.href = 'login.html';
+          });
+        }
+      }
+    })();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,8 @@
+{
+  "_comment": "Map domain → creative filename(s) for per-site creative assignment.",
+  "_comment2": "Use exact domain (e.g. 'tomsguide.com') or partial match (e.g. 'toms').",
+  "_comment3": "'default' is used when no domain matches.",
+  "_comment4": "Filenames must exist inside input_images/desktop/ or input_images/mobile/ (or input_images/ root).",
+
+  "default": []
+}

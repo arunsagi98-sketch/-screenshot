@@ -1,0 +1,140 @@
+
+Reading Excel: C:\Users\HP\Desktop\$Screenshot\App_Url_Database.xlsx
+
+  [read]  'AFRICAN'                                          → 684 URLs
+  [read]  'AFRICAN AMERICAN'                                 → 1148 URLs
+  [read]  'NIGERIANS'                                        → 401 URLs
+  [read]  'GHANAIANS'                                        → 64 URLs
+  [read]  'EGYPTIANS'                                        → 85 URLs
+  [read]  'KENYANS'                                          → 105 URLs
+  [read]  'SOUTH AFRICA'                                     → 100 URLs
+  [read]  'MORRACANS'                                        → 95 URLs
+  [read]  'SOMALIA'                                          → 34 URLs
+  [read]  'ALGERIANS'                                        → 59 URLs
+  [read]  'SENEGAL'                                          → 52 URLs
+  [read]  'ETHIOPIANS'                                       → 23 URLs
+  [read]  'CAMEROONS'                                        → 32 URLs
+  [read]  'DR CONGO'                                         → 22 URLs
+  [read]  'TANZANIA'                                         → 15 URLs
+  [read]  'AFRICAN AMERICAN OTHER SITES'                     → 68 URLs
+  [read]  'AMHARIC'                                          → 48 URLs
+  [read]  'ARABIC'                                           → 382 URLs
+  [read]  'ASSYRIAN'                                         → 8 URLs
+  [read]  'BANGALADESH'                                      → 167 URLs
+  [read]  'BURMESE OR (KAREN)'                               → 23 URLs
+  [read]  'CANTONESE'                                        → 126 URLs
+  [read]  'CANTONESE CANADA'                                 → 126 URLs
+  [read]  'CHIN HAKA'                                        → 12 URLs
+  [read]  'CHINESE_AU OR (CHINESE AUSTRALI'                  → 113 URLs
+  [read]  'CHINESE_CA OR (CHINESE CANANDA)'                  → 143 URLs
+  [read]  'COMBODIAN OR (KHMER)'                             → 58 URLs
+  [read]  'CROATIANS'                                        → 164 URLs
+  [read]  'DARI OR (PERSIAN) OR (FARSI)'                     → 59 URLs
+  [read]  'DINKA'                                            → 20 URLs
+  [read]  'FIJI'                                             → 20 URLs
+  [read]  'FILIPINO OR (TAGALOG)'                            → 436 URLs
+  [read]  'FRENCH'                                           → 307 URLs
+  [read]  'GREEK'                                            → 224 URLs
+  [read]  'HONG KONG'                                        → 36 URLs
+  [read]  'INDIAN'                                           → 392 URLs
+  [read]  'INDIAN ENGLISH OR (ENGLISH)'                      → 153 URLs
+  [read]  'INDIAN GUJARATI OR (GUJARATI)'                    → 11 URLs
+  [read]  'INDIAN MALAYALAM OR (MALAYALAM)'                  → 50 URLs
+  [read]  'INDIAN TELUGU OR (TELUGU)'                        → 12 URLs
+  [read]  'INDIAN PUNJABI OR (PUNJABI)'                      → 52 URLs
+  [read]  'INDIAN HINDI OR (HINDI)'                          → 102 URLs
+  [read]  'INDIAN TAMIL OR (TAMIL)'                          → 22 URLs
+  [read]  'INDONESIAN'                                       → 204 URLs
+  [read]  'ITALIAN'                                          → 445 URLs
+  [read]  'JAPANESE'                                         → 345 URLs
+  [read]  'KOREAN'                                           → 234 URLs
+  [read]  'MALAY'                                            → 90 URLs
+  [read]  'MANDARIN'                                         → 82 URLs
+  [read]  'MANDARIN CANADA'                                  → 81 URLs
+  [read]  'MACEDONIANS'                                      → 43 URLs
+  [read]  'NEPALESE'                                         → 61 URLs
+  [read]  'PACIFIC ISLANDER'                                 → 355 URLs
+  [read]  'PAKISTAN'                                         → 130 URLs
+  [read]  'PUNJABI-CA OR (PUNJABI CANADA)'                   → 56 URLs
+  [read]  'SINGAPOREAN'                                      → 90 URLs
+  [read]  'SOUTH ASIAN'                                      → 878 URLs
+  [read]  'SOUTH EAST ASIAN'                                 → 1364 URLs
+  [read]  'SPANISH'                                          → 237 URLs
+  [read]  'SRILANKAN'                                        → 172 URLs
+  [read]  'SUDANESE'                                         → 36 URLs
+  [read]  'TAIWAN'                                           → 111 URLs
+  [read]  'THAI'                                             → 125 URLs
+  [read]  'TURKISH'                                          → 344 URLs
+  [read]  'VIETNAMESE'                                       → 340 URLs
+  [read]  'Cantonesh'                                        → 10 URLs
+
+Connecting to PostgreSQL ...
+  [insert] 'AFRICAN'                                          → 684 rows
+  [insert] 'AFRICAN AMERICAN'                                 → 1148 rows
+  [insert] 'NIGERIANS'                                        → 401 rows
+  [insert] 'GHANAIANS'                                        → 64 rows
+  [insert] 'EGYPTIANS'                                        → 85 rows
+  [insert] 'KENYANS'                                          → 105 rows
+  [insert] 'SOUTH AFRICA'                                     → 100 rows
+  [insert] 'MORRACANS'                                        → 95 rows
+  [insert] 'SOMALIA'                                          → 34 rows
+  [insert] 'ALGERIANS'                                        → 59 rows
+  [insert] 'SENEGAL'                                          → 52 rows
+  [insert] 'ETHIOPIANS'                                       → 23 rows
+  [insert] 'CAMEROONS'                                        → 32 rows
+  [insert] 'DR CONGO'                                         → 22 rows
+  [insert] 'TANZANIA'                                         → 15 rows
+  [insert] 'AFRICAN AMERICAN OTHER SITES'                     → 68 rows
+  [insert] 'AMHARIC'                                          → 48 rows
+  [insert] 'ARABIC'                                           → 382 rows
+  [insert] 'ASSYRIAN'                                         → 8 rows
+  [insert] 'BANGALADESH'                                      → 167 rows
+  [insert] 'BURMESE OR (KAREN)'                               → 23 rows
+  [insert] 'CANTONESE'                                        → 126 rows
+  [insert] 'CANTONESE CANADA'                                 → 126 rows
+  [insert] 'CHIN HAKA'                                        → 12 rows
+  [insert] 'CHINESE_AU OR (CHINESE AUSTRALI'                  → 113 rows
+  [insert] 'CHINESE_CA OR (CHINESE CANANDA)'                  → 143 rows
+  [insert] 'COMBODIAN OR (KHMER)'                             → 58 rows
+  [insert] 'CROATIANS'                                        → 164 rows
+  [insert] 'DARI OR (PERSIAN) OR (FARSI)'                     → 59 rows
+  [insert] 'DINKA'                                            → 20 rows
+  [insert] 'FIJI'                                             → 20 rows
+  [insert] 'FILIPINO OR (TAGALOG)'                            → 436 rows
+  [insert] 'FRENCH'                                           → 307 rows
+  [insert] 'GREEK'                                            → 224 rows
+  [insert] 'HONG KONG'                                        → 36 rows
+  [insert] 'INDIAN'                                           → 392 rows
+  [insert] 'INDIAN ENGLISH OR (ENGLISH)'                      → 153 rows
+  [insert] 'INDIAN GUJARATI OR (GUJARATI)'                    → 11 rows
+  [insert] 'INDIAN MALAYALAM OR (MALAYALAM)'                  → 50 rows
+  [insert] 'INDIAN TELUGU OR (TELUGU)'                        → 12 rows
+  [insert] 'INDIAN PUNJABI OR (PUNJABI)'                      → 52 rows
+  [insert] 'INDIAN HINDI OR (HINDI)'                          → 102 rows
+  [insert] 'INDIAN TAMIL OR (TAMIL)'                          → 22 rows
+  [insert] 'INDONESIAN'                                       → 204 rows
+  [insert] 'ITALIAN'                                          → 445 rows
+  [insert] 'JAPANESE'                                         → 345 rows
+  [insert] 'KOREAN'                                           → 234 rows
+  [insert] 'MALAY'                                            → 90 rows
+  [insert] 'MANDARIN'                                         → 82 rows
+  [insert] 'MANDARIN CANADA'                                  → 81 rows
+  [insert] 'MACEDONIANS'                                      → 43 rows
+  [insert] 'NEPALESE'                                         → 61 rows
+  [insert] 'PACIFIC ISLANDER'                                 → 355 rows
+  [insert] 'PAKISTAN'                                         → 130 rows
+  [insert] 'PUNJABI-CA OR (PUNJABI CANADA)'                   → 56 rows
+  [insert] 'SINGAPOREAN'                                      → 90 rows
+  [insert] 'SOUTH ASIAN'                                      → 878 rows
+  [insert] 'SOUTH EAST ASIAN'                                 → 1364 rows
+  [insert] 'SPANISH'                                          → 237 rows
+  [insert] 'SRILANKAN'                                        → 172 rows
+  [insert] 'SUDANESE'                                         → 36 rows
+  [insert] 'TAIWAN'                                           → 111 rows
+  [insert] 'THAI'                                             → 125 rows
+  [insert] 'TURKISH'                                          → 344 rows
+  [insert] 'VIETNAMESE'                                       → 340 rows
+  [insert] 'Cantonesh'                                        → 10 rows
+
+Done! Total URLs inserted: 12086
+    Sheets: 66

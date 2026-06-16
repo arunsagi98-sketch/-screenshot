@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AdVision AI — Login</title>
+  <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #080c1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: #e3e3e8;
+    }
+
+    .login-card {
+      background: #0d1228;
+      border: 1px solid rgba(99,102,241,0.18);
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 2rem;
+      justify-content: center;
+    }
+    .logo-icon {
+      width: 40px; height: 40px;
+      background: rgba(99,102,241,0.15);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; color: #6366f1;
+    }
+    .logo-name { font-size: 1.2rem; font-weight: 600; color: #e3e3e8; }
+    .logo-sub  { font-size: 0.72rem; color: #6b7280; }
+
+    h1 { font-size: 1.3rem; font-weight: 600; margin-bottom: 0.25rem; text-align: center; }
+    .subtitle { font-size: 0.82rem; color: #6b7280; text-align: center; margin-bottom: 1.75rem; }
+
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; font-size: 0.8rem; color: #9ca3af; margin-bottom: 6px; }
+
+    .input-wrap {
+      position: relative;
+    }
+    .input-wrap i {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: #4b5563; font-size: 1rem;
+    }
+    input {
+      width: 100%;
+      background: #111830;
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 8px;
+      padding: 10px 12px 10px 36px;
+      color: #e3e3e8;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus { border-color: rgba(99,102,241,0.6); }
+    input::placeholder { color: #4b5563; }
+
+    .btn-login {
+      width: 100%;
+      padding: 11px;
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.2s, opacity 0.2s;
+    }
+    .btn-login:hover   { background: #5254cc; }
+    .btn-login:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .error-msg {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #f87171;
+      font-size: 0.82rem;
+      margin-top: 1rem;
+      display: none;
+    }
+    .error-msg.show { display: block; }
+
+    .role-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-top: 1.25rem;
+      width: 100%;
+      justify-content: center;
+      color: #6b7280;
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-card">
+  <div class="logo">
+    <div class="logo-icon"><i class='bx bx-film'></i></div>
+    <div>
+      <div class="logo-name">AdVision AI</div>
+      <div class="logo-sub">Ad Injector Platform</div>
+    </div>
+  </div>
+
+  <h1>Welcome back</h1>
+  <p class="subtitle">Sign in to your account</p>
+
+  <form id="loginForm">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <div class="input-wrap">
+        <i class='bx bx-user'></i>
+        <input type="text" id="username" placeholder="Enter username" autocomplete="username" required />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <div class="input-wrap">
+        <i class='bx bx-lock-alt'></i>
+        <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" required />
+      </div>
+    </div>
+
+    <button type="submit" class="btn-login" id="loginBtn">
+      <span id="btnText">Sign In</span>
+    </button>
+
+    <div class="error-msg" id="errorMsg"></div>
+  </form>
+
+  <div class="role-badge">
+    <i class='bx bx-shield-quarter'></i>
+    Secured — Role-Based Access Control
+  </div>
+</div>
+
+<script>
+  const API_BASE = window.location.origin.includes('127.0.0.1') || window.location.origin.includes('localhost')
+    ? 'http://127.0.0.1:8001'
+    : window.location.origin;
+
+  // Already logged in? Go to dashboard
+  if (localStorage.getItem('access_token')) {
+    window.location.href = 'index.html';
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn     = document.getElementById('loginBtn');
+    const errEl   = document.getElementById('errorMsg');
+    const btnText = document.getElementById('btnText');
+
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+
+    btn.disabled  = true;
+    btnText.textContent = 'Signing in...';
+    errEl.classList.remove('show');
+
+    try {
+      const form = new URLSearchParams();
+      form.append('username', username);
+      form.append('password', password);
+
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: form,
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail || 'Login failed');
+      }
+
+      const data = await res.json();
+      localStorage.setItem('access_token',  data.access_token);
+      localStorage.setItem('user_role',     data.role);
+      localStorage.setItem('username',      data.username);
+      // null means super_admin (all pages); store as JSON string
+      localStorage.setItem('allowed_pages', JSON.stringify(data.allowed_pages));
+
+      // Redirect: super_admin → index.html; restricted user → first allowed page
+      if (data.allowed_pages === null || data.allowed_pages === undefined) {
+        window.location.href = 'index.html';
+      } else {
+        const pageMap = {
+          scanner:      'index.html',
+          crm_excel:    'crm-excel.html',
+          ppt_store:    'ppt-store.html',
+          final_report: 'final-report.html',
+        };
+        const first = data.allowed_pages[0];
+        window.location.href = first ? (pageMap[first] || 'index.html') : 'login.html';
+      }
+
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.classList.add('show');
+      btn.disabled  = false;
+      btnText.textContent = 'Sign In';
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+## Render.com deployment configuration
+## Docs: https://render.com/docs/yaml-spec
+##
+## IMPORTANT — Playwright needs Chromium binaries installed at build time.
+## The build command below handles this automatically.
+
+services:
+  - type: web
+    name: creative-scanner-pro
+    env: python
+    # rootDir tells Render to treat Backend_Screenshot/ as the project root.
+    # All relative paths in main.py, config.py, etc. are relative to this.
+    rootDir: Backend_Screenshot
+
+    # ── Build ──────────────────────────────────────────────────────────────────
+    # 1. Install Python deps
+    # 2. Install Playwright's Chromium binary + its OS-level deps
+    buildCommand: >
+      pip install -r requirements.txt &&
+      playwright install chromium &&
+      playwright install-deps chromium
+
+    # ── Start ─────────────────────────────────────────────────────────────────
+    # Render injects $PORT automatically; uvicorn reads it via run.py / main.py.
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+
+    # ── Persistent disk (RECOMMENDED — prevents data loss on restart) ──────────
+    # Uncomment the block below if you are on a paid Render plan.
+    # Then set INPUT_IMAGES_DIR=/data/input_images and
+    #      screenshots_dir (via SCREENSHOTS_DIR) to /data/screenshots
+    # in the envVars section so files survive restarts.
+    #
+    # disk:
+    #   name: scanner-data
+    #   mountPath: /data
+    #   sizeGB: 5
+
+    # ── Environment variables ──────────────────────────────────────────────────
+    envVars:
+      - key: APP_ENV
+        value: production
+
+      - key: LOG_LEVEL
+        value: INFO
+
+      # Set to your Render PostgreSQL connection string for persistent results.
+      # Without this, results are stored in SQLite and LOST on every restart/redeploy.
+      # Format: postgresql://user:password@host:5432/dbname
+      - key: DATABASE_URL
+        value: sqlite:///./scanner.db   # ← replace with postgres URL for persistence
+
+      # Required to protect /process, /results, /upload-creatives endpoints.
+      # Generate a strong random string: python -c "import secrets; print(secrets.token_hex(32))"
+      - key: API_KEY
+        generateValue: true
+
+      # Optional — Claude Vision-powered ad detection. Leave blank to use DOM scanner only.
+      - key: ANTHROPIC_API_KEY
+        sync: false                      # set manually in Render dashboard
+
+      # Reduce concurrency on free/starter tier — Playwright+Chrome uses ~200 MB per tab.
+      # Free tier has 512 MB RAM → max 2. Starter (2 GB) → up to 8.
+      - key: ENGINE_CONCURRENCY
+        value: "3"
+
+      # Always headless in cloud — no display available.
+      - key: HEADLESS
+        value: "true"
+
+# ── Optional: managed PostgreSQL ─────────────────────────────────────────────
+# Uncomment to have Render create a free (limited) PostgreSQL instance.
+# Then change DATABASE_URL above to use fromDatabase.
+#
+# databases:
+#   - name: creative-scanner-db
+#     databaseName: scanner
+#     user: scanner

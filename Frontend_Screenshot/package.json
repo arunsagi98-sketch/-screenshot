@@ -1,0 +1,20 @@
+{
+  "name": "creative-scanner-pro-frontend",
+  "version": "2.0.0",
+  "description": "Vanilla JS dashboard for Creative Scanner Pro — no bundler required.",
+  "type": "module",
+  "scripts": {
+    "dev": "npx serve . -p 3000 --cors",
+    "lint": "npx eslint src/**/*.js",
+    "format": "npx prettier --write src/**/*.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "serve": "^14.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

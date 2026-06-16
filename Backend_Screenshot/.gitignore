@@ -1,10 +1,33 @@
 venv/
+.venv/
 .env
 __pycache__/
 *.pyc
+*.pyo
+
+# Browser profile data — ephemeral, not needed in repo
+browser_data/
+browser_data_desktop/
+browser_data_mobile/
+
+# Screenshots output — too large for git
 screenshots/*.png
+
+# SQLite database — use DATABASE_URL env var for production
+scanner.db
+
+# Test artefacts
 test.png
+test_report.pptx
+test*.pptx
+
+# Creative images — upload via /upload-creatives API
 input_images/*
 !input_images/.gitkeep
+!input_images/desktop/.gitkeep
+!input_images/mobile/.gitkeep
+
+# IDE
 .vscode/
 .idea/
+

@@ -1,4 +1,5 @@
 import asyncio
+import os
 import sys
 import uvicorn
 
@@ -10,11 +11,15 @@ if __name__ == "__main__":
             asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
         except Exception:
             pass
-    
-    # Disable reload=True on Windows to prevent loop conflicts
+
+    # Render (and most PaaS) injects PORT env var and requires host 0.0.0.0.
+    # Falls back to 127.0.0.1:8001 for local dev when PORT is not set.
+    _host = "0.0.0.0" if os.environ.get("PORT") else "127.0.0.1"
+    _port = int(os.environ.get("PORT", 8001))
+
     uvicorn.run(
-        "main:app", 
-        host="127.0.0.1", 
-        port=8000, 
-        reload=False
+        "main:app",
+        host=_host,
+        port=_port,
+        reload=False,
     )

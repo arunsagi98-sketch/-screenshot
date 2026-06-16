@@ -1,0 +1,15 @@
+Alembic migrations for Creative Scanner Pro.
+
+Run from Backend_Screenshot/:
+
+    # Apply all pending migrations
+    alembic upgrade head
+
+    # Generate a new migration after editing models/
+    alembic revision --autogenerate -m "add column xyz"
+
+    # Roll back one step
+    alembic downgrade -1
+
+    # Show current migration state
+    alembic current

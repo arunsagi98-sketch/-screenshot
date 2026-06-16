@@ -1,0 +1,11 @@
+2026-06-14T13:12:34 | INFO     | main | Frontend UI mounted at /ui/
+INFO:     Started server process [22560]
+INFO:     Waiting for application startup.
+2026-06-14T13:12:34 | INFO     | main | Starting Creative Scanner Pro [env=development]
+2026-06-14T13:12:35 | INFO     | main | Database tables ready
+2026-06-14T13:12:35 | INFO     | main | Startup migrations complete
+2026-06-14T13:12:35 | INFO     | main | CRM DB column migrations complete
+INFO:     Application startup complete.
+ERROR:    [Errno 10048] error while attempting to bind on address ('127.0.0.1', 8001): [winerror 10048] only one usage of each socket address (protocol/network address/port) is normally permitted
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.

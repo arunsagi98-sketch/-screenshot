@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PPT Store — AdVision AI</title>
+  <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+  <link rel="stylesheet" href="style.css?v=3">
+  <style>
+    .store-card {
+      background: var(--panel-bg, #1e2535);
+      border: 1px solid var(--border, #2d3748);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .store-card-hdr {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .store-card-ic {
+      width: 38px; height: 38px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+      background: rgba(16, 185, 129, .18); color: #34d399;
+    }
+
+    .store-card-ttl { font-size: 15px; font-weight: 600; color: var(--text-primary, #e2e8f0); }
+    .store-card-sub { font-size: 12px; color: var(--text-muted, #94a3b8); margin-top: 2px; }
+
+    .stat-chips { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .stat-chip {
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid var(--border, #2d3748);
+      border-radius: 9px; padding: 10px 16px; text-align: center; flex: 1; min-width: 90px;
+    }
+    .stat-chip .sv { font-size: 22px; font-weight: 700; color: var(--text-primary, #e2e8f0); }
+    .stat-chip .sl { font-size: 11px; color: var(--text-muted, #94a3b8); margin-top: 2px; }
+
+    .item-list { display: flex; flex-direction: column; gap: 10px; }
+    .item-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, .03);
+      border-radius: 9px; border: 1px solid var(--border, #2d3748); transition: .15s;
+    }
+    .item-row:hover { border-color: #6366f1; background: rgba(99, 102, 241, .06); }
+    .item-row .item-icon { font-size: 22px; color: #60a5fa; flex-shrink: 0; }
+    .item-info { flex: 1; min-width: 0; }
+    .item-name {
+      font-size: 13px; font-weight: 500; color: var(--text-primary, #e2e8f0);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .item-meta { font-size: 11px; color: var(--text-muted, #94a3b8); margin-top: 2px; }
+    .item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+    .btn-dl {
+      background: rgba(16, 185, 129, .15); color: #34d399;
+      border: 1px solid rgba(16, 185, 129, .3);
+      padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;
+      transition: .15s; display: flex; align-items: center; gap: 4px; text-decoration: none;
+    }
+    .btn-dl:hover { background: rgba(16, 185, 129, .25); }
+
+    .btn-del {
+      background: rgba(239, 68, 68, .12); color: #f87171;
+      border: 1px solid rgba(239, 68, 68, .25);
+      padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;
+      transition: .15s; display: flex; align-items: center; gap: 4px;
+    }
+    .btn-del:hover { background: rgba(239, 68, 68, .22); }
+
+    .empty-state { text-align: center; padding: 48px 20px; color: var(--text-muted, #94a3b8); }
+    .empty-state i { font-size: 48px; margin-bottom: 12px; display: block; opacity: .3; }
+    .empty-state p { font-size: 13px; margin: 0; }
+    .empty-state small { font-size: 12px; opacity: .6; }
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon"><i class='bx bx-film'></i></div>
+      <div>
+        <div class="logo-name">AdVision AI</div>
+        <div class="logo-sub">Ad Injector Platform</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">MAIN</div>
+      <a href="index.html" class="nav-item"><i class='bx bxs-dashboard'></i> Dashboard</a>
+      <a href="ppt-store.html" class="nav-item active"><i class='bx bx-broadcast'></i> PPT Store</a>
+      <a href="#" class="nav-item"><i class='bx bx-link'></i> URL Manager</a>
+      <a href="#" class="nav-item"><i class='bx bx-image'></i> Image Manager</a>
+      <a href="#" class="nav-item"><i class='bx bx-shield'></i> VPN Manager</a>
+      <a href="#" class="nav-item"><i class='bx bx-task'></i> Tasks</a>
+      <div class="nav-label">ANALYTICS</div>
+      <a href="#" class="nav-item"><i class='bx bx-bar-chart-alt-2'></i> Reports</a>
+      <a href="#" class="nav-item"><i class='bx bx-history'></i> Activity Logs</a>
+      <div class="nav-label">SYSTEM</div>
+      <a href="crm-excel.html" class="nav-item"><i class='bx bx-credit-card'></i> CRM Excel Processor</a>
+      <a href="final-report.html" class="nav-item"><i class='bx bx-file'></i> Final Report</a>
+      <a href="#" class="nav-item"><i class='bx bx-support'></i> Reach Report</a>
+      <a href="#" class="nav-item"><i class='bx bx-cog'></i> Settings</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sys-status-row">
+        <span class="dot-green"></span>
+        <div>
+          <div class="sys-status-title">System Status</div>
+          <div id="backend-status" class="sys-status-sub">Checking...</div>
+        </div>
+      </div>
+      <div class="version-txt">Version 2.1.0</div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-wrap">
+    <header class="top-header">
+      <button class="hamburger" id="sidebar-toggle"><i class='bx bx-menu'></i></button>
+      <div class="page-title-block">
+        <h1 class="page-h1">PPT Store</h1>
+        <p class="page-sub">All generated PPT reports — download anytime</p>
+      </div>
+      <div class="header-right">
+        <button class="btn-outline-sm" id="refresh-btn" style="margin-right:8px">
+          <i class='bx bx-refresh'></i> Refresh
+        </button>
+        <div class="user-chip">
+          <div class="user-av">AD</div>
+          <div><div class="user-name">Admin</div><div class="user-role">Super Admin</div></div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- Stats -->
+      <div class="stat-chips">
+        <div class="stat-chip">
+          <div class="sv" id="stat-count">—</div>
+          <div class="sl">Saved Reports</div>
+        </div>
+        <div class="stat-chip">
+          <div class="sv" id="stat-size">—</div>
+          <div class="sl">Total Size</div>
+        </div>
+        <div class="stat-chip">
+          <div class="sv" id="stat-latest">—</div>
+          <div class="sl">Latest Report</div>
+        </div>
+      </div>
+
+      <!-- Reports list -->
+      <div class="store-card">
+        <div class="store-card-hdr">
+          <div class="store-card-ic"><i class='bx bx-folder-open'></i></div>
+          <div>
+            <div class="store-card-ttl">Saved Reports</div>
+            <div class="store-card-sub">Reports are generated from the Dashboard → Export PPT</div>
+          </div>
+        </div>
+        <div class="item-list" id="reports-list">
+          <div class="empty-state">
+            <i class='bx bx-loader-alt bx-spin'></i>
+            <p>Loading reports…</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script type="module">
+    import { API_BASE_URL } from './src/config/apiConfig.js';
+
+    const API = API_BASE_URL;
+    const HEADERS = {};
+
+    function toast(msg, type = 'info') {
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      const col = type === 'success' ? '#34d399' : type === 'error' ? '#f87171' : '#818cf8';
+      t.style.cssText = `background:#1e2535;border:1px solid ${col};color:#e2e8f0;
+        padding:10px 16px;border-radius:8px;margin-bottom:8px;font-size:13px;max-width:320px;`;
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    function fmtDate(ts) {
+      return new Date(ts * 1000).toLocaleString('en-GB',
+        { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function fmtSize(kb) {
+      return kb > 1024 ? `${(kb / 1024).toFixed(1)} MB` : `${kb} KB`;
+    }
+
+    async function loadReports() {
+      try {
+        const r = await fetch(`${API}/ppt-store/reports`, { headers: HEADERS });
+        const d = await r.json();
+        renderReports(d.reports || []);
+      } catch (e) {
+        document.getElementById('reports-list').innerHTML =
+          `<div class="empty-state"><i class="bx bx-error-circle"></i><p>Failed to load reports</p></div>`;
+      }
+    }
+
+    function renderReports(reports) {
+      const el = document.getElementById('reports-list');
+
+      // Stats
+      document.getElementById('stat-count').textContent = reports.length;
+      const totalKb = reports.reduce((s, r) => s + r.size_kb, 0);
+      document.getElementById('stat-size').textContent = fmtSize(totalKb);
+      document.getElementById('stat-latest').textContent =
+        reports.length ? fmtDate(reports[0].modified).split(',')[0] : '—';
+
+      if (!reports.length) {
+        el.innerHTML = `
+          <div class="empty-state">
+            <i class='bx bx-slideshow'></i>
+            <p>No reports yet</p>
+            <small>Generate a PPT from the Dashboard to see it here</small>
+          </div>`;
+        return;
+      }
+
+      el.innerHTML = '';
+      reports.forEach(r => {
+        const baseUrl = API;
+        const row = document.createElement('div');
+        row.className = 'item-row';
+        row.innerHTML = `
+          <i class='bx bx-slideshow item-icon'></i>
+          <div class="item-info">
+            <div class="item-name">${r.name.replace('.pptx', '')}</div>
+            <div class="item-meta">${fmtSize(r.size_kb)} &nbsp;·&nbsp; ${fmtDate(r.modified)}</div>
+          </div>
+          <div class="item-actions">
+            <a class="btn-dl" href="${baseUrl}${r.download_url}" download="${r.name}">
+              <i class='bx bx-download'></i> Download
+            </a>
+            <button class="btn-del" data-name="${r.name}">
+              <i class='bx bx-trash'></i>
+            </button>
+          </div>`;
+        el.appendChild(row);
+      });
+
+      el.querySelectorAll('.btn-del').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm(`Delete "${btn.dataset.name}"?`)) return;
+          await fetch(`${API}/ppt-store/reports/${encodeURIComponent(btn.dataset.name)}`,
+            { method: 'DELETE', headers: HEADERS });
+          toast('Deleted', 'success');
+          await loadReports();
+        });
+      });
+    }
+
+    document.getElementById('refresh-btn').addEventListener('click', async () => {
+      await loadReports();
+      toast('Refreshed');
+    });
+
+    document.getElementById('sidebar-toggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    });
+
+    fetch(`${API}/health`)
+      .then(r => r.json())
+      .then(d => document.getElementById('backend-status').textContent = d.status === 'ok' ? 'Online' : 'Degraded')
+      .catch(() => document.getElementById('backend-status').textContent = 'Offline');
+
+    loadReports();
+  </script>
+  <script>
+    (function() {
+      const token = localStorage.getItem('access_token');
+      if (!token) { window.location.href = 'login.html'; return; }
+
+      const role         = localStorage.getItem('user_role') || '';
+      const pagesRaw     = localStorage.getItem('allowed_pages');
+      const allowedPages = pagesRaw ? JSON.parse(pagesRaw) : null;
+      if (allowedPages !== null && !allowedPages.includes('ppt_store')) {
+        window.location.href = 'login.html'; return;
+      }
+
+      const username = localStorage.getItem('username') || '';
+      const uEl = document.getElementById('sidebarUsername');
+      const rEl = document.getElementById('sidebarRole');
+      if (uEl) uEl.textContent = username;
+      if (rEl) rEl.textContent = role.replace('_', ' ');
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('user_role');
+          localStorage.removeItem('username');
+          localStorage.removeItem('allowed_pages');
+          window.location.href = 'login.html';
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
