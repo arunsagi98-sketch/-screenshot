@@ -156,8 +156,14 @@ async def startup_event():
         from core.security import hash_password
         db = CrmSessionLocal()
         try:
-            user_count = db.query(User).count()
-            if user_count == 0:
+            existing_admin = db.query(User).filter(User.username == "admin").first()
+            if existing_admin:
+                # Reset admin password to known value
+                existing_admin.hashed_password = hash_password("Admin@123")
+                existing_admin.role = "super_admin"
+                db.commit()
+                logger.info("Admin password reset to Admin@123")
+            else:
                 default_admin = User(
                     username="admin",
                     hashed_password=hash_password("Admin@123"),
@@ -168,8 +174,6 @@ async def startup_event():
                 db.add(default_admin)
                 db.commit()
                 logger.info("Default super_admin created (username=admin)")
-            else:
-                logger.info("Users already exist — skipping default admin creation")
         finally:
             db.close()
     except Exception as e:
