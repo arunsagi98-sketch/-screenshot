@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <script>window.API_BASE_URL = "https://creative-scanner-backend-2.onrender.com";</script>
+  <script>if(!window.location.hostname.includes('localhost')&&!window.location.hostname.includes('127.0.0.1'))window.API_BASE_URL="https://creative-scanner-backend-2.onrender.com";</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Final Report — AdVision AI</title>
@@ -1009,6 +1009,37 @@
     </div>
 
 
+    <!-- App URL Database Update -->
+    <div class="fr-card" id="app-url-update-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <div class="fr-card-title" style="margin-bottom:2px;">
+            <i class='bx bx-data' style="color:var(--accent);margin-right:6px;"></i>Update App URL Database
+          </div>
+          <div class="fr-card-sub">Upload the Sites Excel to replace app_url_reference table</div>
+        </div>
+      </div>
+
+      <div class="upload-zone" id="appurl-zone" style="padding:28px 24px;">
+        <input type="file" id="appurl-input" accept=".xlsx,.xls">
+        <div class="upload-icon"><i class='bx bx-link'></i></div>
+        <div class="upload-text">Drag &amp; drop Sites Excel here, or click to browse</div>
+        <div class="upload-sub">Supports .xlsx · .xls — All language sheets will be updated</div>
+      </div>
+
+      <div class="file-chip" id="appurl-chip">
+        <i class='bx bx-file-blank'></i>
+        <span id="appurl-label">—</span>
+        <button onclick="clearAppUrlFile()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;margin-left:4px;"><i class='bx bx-x'></i></button>
+      </div>
+
+      <button class="btn-process" id="appurl-btn" onclick="uploadAppUrls()" disabled style="margin-top:16px;">
+        <i class='bx bx-upload'></i> Update Database
+      </button>
+
+      <div id="appurl-result" style="display:none;margin-top:16px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:14px 16px;font-size:0.82rem;color:#10b981;"></div>
+    </div>
+
     <!-- Saved Reports -->
     <div class="fr-card" id="saved-reports-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
@@ -1598,6 +1629,64 @@
       }
     }
     window.deleteSavedReport = deleteSavedReport;
+
+    // ── App URL Database Update ────────────────────────────────────────────
+    let _appUrlFile = null;
+
+    const _appUrlZone  = document.getElementById('appurl-zone');
+    const _appUrlInput = document.getElementById('appurl-input');
+
+    _appUrlZone.addEventListener('dragover', e => { e.preventDefault(); _appUrlZone.classList.add('drag-over'); });
+    _appUrlZone.addEventListener('dragleave', () => _appUrlZone.classList.remove('drag-over'));
+    _appUrlZone.addEventListener('drop', e => {
+      e.preventDefault(); _appUrlZone.classList.remove('drag-over');
+      if (e.dataTransfer.files[0]) _setAppUrlFile(e.dataTransfer.files[0]);
+    });
+    _appUrlInput.addEventListener('change', () => { if (_appUrlInput.files[0]) _setAppUrlFile(_appUrlInput.files[0]); });
+
+    function _setAppUrlFile(f) {
+      const ext = f.name.split('.').pop().toLowerCase();
+      if (!['xlsx','xls'].includes(ext)) { showToast('Only .xlsx / .xls allowed', 'error'); return; }
+      _appUrlFile = f;
+      document.getElementById('appurl-label').textContent = f.name;
+      document.getElementById('appurl-chip').classList.add('show');
+      document.getElementById('appurl-btn').disabled = false;
+      document.getElementById('appurl-result').style.display = 'none';
+    }
+
+    function clearAppUrlFile() {
+      _appUrlFile = null;
+      _appUrlInput.value = '';
+      document.getElementById('appurl-chip').classList.remove('show');
+      document.getElementById('appurl-btn').disabled = true;
+      document.getElementById('appurl-result').style.display = 'none';
+    }
+    window.clearAppUrlFile = clearAppUrlFile;
+
+    async function uploadAppUrls() {
+      if (!_appUrlFile) return;
+      const btn = document.getElementById('appurl-btn');
+      btn.disabled = true;
+      btn.innerHTML = `<i class='bx bx-loader-alt bx-spin'></i> Updating...`;
+      try {
+        const api  = (window.API_BASE_URL || window._API || 'http://127.0.0.1:8001').replace(/\/$/, '');
+        const form = new FormData();
+        form.append('file', _appUrlFile);
+        const resp = await fetch(`${api}/final-report/update-app-urls`, { method: 'POST', body: form });
+        if (!resp.ok) { const e = await resp.json().catch(()=>({})); throw new Error(e.detail || `Server error ${resp.status}`); }
+        const data = await resp.json();
+        const el = document.getElementById('appurl-result');
+        el.style.display = 'block';
+        el.innerHTML = `<i class='bx bx-check-circle'></i> <strong>${data.sheets_updated} sheets</strong> updated — <strong>${data.total_urls.toLocaleString()} URLs</strong> inserted`;
+        showToast(`Database updated — ${data.total_urls.toLocaleString()} URLs`, 'success');
+      } catch(e) {
+        showToast(e.message || 'Update failed', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class='bx bx-upload'></i> Update Database`;
+      }
+    }
+    window.uploadAppUrls = uploadAppUrls;
 
     // Auto-load saved reports on page open
     loadSavedReports();

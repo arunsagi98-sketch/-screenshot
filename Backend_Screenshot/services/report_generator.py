@@ -646,18 +646,9 @@ def write_reach_sheet(ws, rows: list[dict]) -> None:
         let   = col_map[h]
 
         if h == "Click Rate (CTR)":
-            # Write as a plain float — NOT a formula — so openpyxl data_only=True
-            # can read it back for QC.  (=IFERROR(B2/A2,0) returns None when
-            # uncached, which causes ctr_raw="" and two false REACH FAILs.)
-            if isinstance(val, str) and val.strip().endswith("%"):
-                try:
-                    cell.value = float(val.strip()[:-1]) / 100.0
-                except Exception:
-                    cell.value = 0.0
-            elif isinstance(val, (int, float)):
-                cell.value = float(val)
-            else:
-                cell.value = 0.0
+            # Formula: =B2/A2 (Clicks / Impressions)
+            # QC reader falls back to computing from Impressions/Clicks if uncached.
+            cell.value         = f"={col_map['Clicks']}2/{col_map['Impressions']}2"
             cell.number_format = "0.00%"
         elif h in ("Impressions", "Clicks", "Reach", "Frequency"):
             cell.value         = int(val) if val != "" else 0
@@ -885,6 +876,7 @@ def write_date_sheet(ws, rows: list[dict], total_row: dict, is_banner: bool) -> 
     col_map  = {h: get_column_letter(i) for i, h in enumerate(headers, 1)}
 
     _sh_header(ws, headers)
+    ws.cell(row=1, column=1).alignment = _align("center")   # Date header → CENTER
 
     for r_idx, row in enumerate(rows, 2):
         for c_idx, h in enumerate(headers, 1):
@@ -926,6 +918,7 @@ def write_app_url_sheet(ws, rows: list[dict], total_row: dict) -> None:
     """
     col_map = {h: get_column_letter(i) for i, h in enumerate(_APP_URL_H, 1)}
     _sh_header(ws, _APP_URL_H)
+    ws.cell(row=1, column=1).alignment = _align("left")   # App/URL header → LEFT
     for r_idx, row in enumerate(rows, 2):
         for c_idx, h in enumerate(_APP_URL_H, 1):
             _sh_data_cell(ws.cell(row=r_idx, column=c_idx),
@@ -963,11 +956,12 @@ def write_time_of_day_sheet(ws, rows: list[dict], total_row: dict) -> None:
     """
     col_map = {h: get_column_letter(i) for i, h in enumerate(_TOD_H, 1)}
     _sh_header(ws, _TOD_H)
+    ws.cell(row=1, column=1).alignment = _align("left")   # Time of Day header → LEFT
     for r_idx, row in enumerate(rows, 2):
         for c_idx, h in enumerate(_TOD_H, 1):
             _sh_data_cell(ws.cell(row=r_idx, column=c_idx),
                           row.get(h, ""), h, c_idx,
-                          "center", col_map, _TOD_F, r_idx,
+                          "left", col_map, _TOD_F, r_idx,
                           other_align="right")
         ws.row_dimensions[r_idx].height = _DATA_HEIGHT
     if total_row and rows:
@@ -1000,6 +994,7 @@ def write_exchange_sheet(ws, rows: list[dict], total_row: dict) -> None:
     """
     col_map = {h: get_column_letter(i) for i, h in enumerate(_EXCHANGE_H, 1)}
     _sh_header(ws, _EXCHANGE_H)
+    ws.cell(row=1, column=1).alignment = _align("left")   # Exchange header → LEFT
     for r_idx, row in enumerate(rows, 2):
         for c_idx, h in enumerate(_EXCHANGE_H, 1):
             _sh_data_cell(ws.cell(row=r_idx, column=c_idx),
@@ -1037,6 +1032,7 @@ def write_device_sheet(ws, rows: list[dict], total_row: dict) -> None:
     """
     col_map = {h: get_column_letter(i) for i, h in enumerate(_DEVICE_H, 1)}
     _sh_header(ws, _DEVICE_H)
+    ws.cell(row=1, column=1).alignment = _align("left")   # Device Type header → LEFT
     for r_idx, row in enumerate(rows, 2):
         for c_idx, h in enumerate(_DEVICE_H, 1):
             _sh_data_cell(ws.cell(row=r_idx, column=c_idx),
@@ -1075,6 +1071,7 @@ def write_creative_sheet(ws, rows: list[dict], total_row: Optional[dict]) -> Non
     """
     col_map = {h: get_column_letter(i) for i, h in enumerate(_CREATIVE_H, 1)}
     _sh_header(ws, _CREATIVE_H)
+    ws.cell(row=1, column=1).alignment = _align("left")   # Creative header → LEFT
     for r_idx, row in enumerate(rows, 2):
         for c_idx, h in enumerate(_CREATIVE_H, 1):
             _sh_data_cell(ws.cell(row=r_idx, column=c_idx),
@@ -1112,6 +1109,7 @@ def write_city_sheet(ws, rows: list[dict], total_row: dict) -> None:
     """
     col_map = {h: get_column_letter(i) for i, h in enumerate(_CITY_H, 1)}
     _sh_header(ws, _CITY_H)
+    ws.cell(row=1, column=1).alignment = _align("left")   # City header → LEFT
     for r_idx, row in enumerate(rows, 2):
         for c_idx, h in enumerate(_CITY_H, 1):
             _sh_data_cell(ws.cell(row=r_idx, column=c_idx),
@@ -1149,11 +1147,12 @@ def write_age_sheet(ws, rows: list[dict], total_row: dict) -> None:
     """
     col_map = {h: get_column_letter(i) for i, h in enumerate(_AGE_H, 1)}
     _sh_header(ws, _AGE_H)
+    ws.cell(row=1, column=1).alignment = _align("left")   # Age header → LEFT
     for r_idx, row in enumerate(rows, 2):
         for c_idx, h in enumerate(_AGE_H, 1):
             _sh_data_cell(ws.cell(row=r_idx, column=c_idx),
                           row.get(h, ""), h, c_idx,
-                          "center", col_map, _AGE_F, r_idx,
+                          "left", col_map, _AGE_F, r_idx,
                           other_align="right")
         ws.row_dimensions[r_idx].height = _DATA_HEIGHT
     if total_row and rows:
@@ -1186,11 +1185,12 @@ def write_gender_sheet(ws, rows: list[dict], total_row: dict) -> None:
     """
     col_map = {h: get_column_letter(i) for i, h in enumerate(_GENDER_H, 1)}
     _sh_header(ws, _GENDER_H)
+    ws.cell(row=1, column=1).alignment = _align("left")   # Gender header → LEFT
     for r_idx, row in enumerate(rows, 2):
         for c_idx, h in enumerate(_GENDER_H, 1):
             _sh_data_cell(ws.cell(row=r_idx, column=c_idx),
                           row.get(h, ""), h, c_idx,
-                          "center", col_map, _GENDER_F, r_idx,
+                          "left", col_map, _GENDER_F, r_idx,
                           other_align="right")
         ws.row_dimensions[r_idx].height = _DATA_HEIGHT
     if total_row and rows:
@@ -1218,21 +1218,41 @@ def build_sheet2_date(df: pd.DataFrame, total_imp: int, total_clk: int,
     sum_imp = sum_clk = sum_view = sum_meas = sum_starts = sum_comp = 0
     vcr_weighted = vcr_imp_total = 0
 
-    # ── Randomise per-day impressions & clicks ────────────────────────────────
-    # Keep dates from source file but redistribute totals randomly each run
+    # ── Use actual impressions & clicks from input sheet if available ─────────
+    # If the input sheet already has Impressions/Clicks values, use them directly.
+    # Only randomise when the source data is missing or all-zero.
     n = len(df)
-    if n > 0:
-        # Random weights for impressions
-        imp_weights = [random.uniform(0.5, 1.5) for _ in range(n)]
-        imp_total_w = sum(imp_weights)
-        rand_imps   = _largest_remainder(imp_weights, imp_total_w, total_imp)
+    _src_imps = [safe_int(r.get("Impressions", 0)) for _, r in df.iterrows()] if n > 0 else []
+    _src_clks = [safe_int(r.get("Clicks", 0))      for _, r in df.iterrows()] if n > 0 else []
+    _has_imp  = sum(_src_imps) > 0
+    _has_clk  = sum(_src_clks) > 0
 
-        # Random weights for clicks — keep overall CTR realistic
-        clk_weights = [random.uniform(0.5, 1.5) for _ in range(n)]
-        clk_total_w = sum(clk_weights)
-        rand_clks   = _largest_remainder(clk_weights, clk_total_w, total_clk)
+    if n > 0 and _has_imp:
+        # Input has real Impressions — use them directly (rescale to match total_imp if needed)
+        _imp_sum = sum(_src_imps)
+        if abs(_imp_sum - total_imp) <= 1:
+            rand_imps = _src_imps           # already matches exactly
+        else:
+            rand_imps = _largest_remainder(_src_imps, _imp_sum, total_imp)
+    elif n > 0:
+        # No Impressions in source → randomise
+        imp_weights = [random.uniform(0.5, 1.5) for _ in range(n)]
+        rand_imps   = _largest_remainder(imp_weights, sum(imp_weights), total_imp)
     else:
         rand_imps = []
+
+    if n > 0 and _has_clk:
+        # Input has real Clicks — use them directly (rescale to match total_clk if needed)
+        _clk_sum = sum(_src_clks)
+        if abs(_clk_sum - total_clk) <= 1:
+            rand_clks = _src_clks
+        else:
+            rand_clks = _largest_remainder(_src_clks, _clk_sum, total_clk)
+    elif n > 0:
+        # No Clicks in source → randomise
+        clk_weights = [random.uniform(0.5, 1.5) for _ in range(n)]
+        rand_clks   = _largest_remainder(clk_weights, sum(clk_weights), total_clk)
+    else:
         rand_clks = []
 
     for row_i, (_, r) in enumerate(df.iterrows()):
@@ -1282,7 +1302,7 @@ def build_sheet2_date(df: pd.DataFrame, total_imp: int, total_clk: int,
                 if starts == 0:
                     starts = round(imp * random.uniform(0.80, 0.95))
                 if comps == 0:
-                    comps = round(starts * random.uniform(0.65, 0.85))
+                    comps = round(starts * random.uniform(0.75, 0.85))
 
             sum_view += view; sum_meas += meas
             sum_starts += starts; sum_comp += comps
@@ -1956,7 +1976,8 @@ def generate_report(
             "Impressions":    [total_imp],
             "Clicks":         [total_clk],
         })
-        is_banner = True
+        # Do NOT override is_banner here — respect the mode passed by the user.
+        # Box-format files can be either Banner or Video campaigns.
     else:
         if ext == "csv":
             df1 = pd.read_csv(io.BytesIO(campaign_file_bytes))

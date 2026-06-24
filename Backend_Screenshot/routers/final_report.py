@@ -330,7 +330,14 @@ async def generate_final_report(
                 _rd        = dict(zip(_hdrs, _dr))
                 impressions = int(_rd.get("Impressions") or 0)
                 clicks      = int(_rd.get("Clicks")      or 0)
-                ctr_raw     = str(_rd.get("Click Rate (CTR)") or "")
+                _ctr_cell   = _rd.get("Click Rate (CTR)")
+                # Formula result may be None (uncached) — compute from imp/clicks as fallback
+                if _ctr_cell is not None:
+                    ctr_raw = str(_ctr_cell)
+                elif impressions > 0:
+                    ctr_raw = f"{clicks / impressions * 100:.2f}%"
+                else:
+                    ctr_raw = "0.00%"
                 reach       = _rd.get("Reach")
                 frequency   = _rd.get("Frequency") or 3
         _wb_tmp.close()
@@ -492,6 +499,86 @@ def delete_saved_report(report_id: int):
     if not deleted:
         raise HTTPException(status_code=404, detail=f"Report {report_id} not found")
     return {"deleted": report_id}
+
+
+@router.post("/update-app-urls")
+async def update_app_urls(file: UploadFile = File(...)):
+    """
+    Replace app_url_reference rows from an uploaded Excel file.
+    Each sheet = one language. Extracts URLs from 3 boxes (cols B, F, J).
+    Skips the 'Summary' sheet.
+    Returns counts per sheet.
+    """
+    ext = (file.filename or "").rsplit(".", 1)[-1].lower()
+    if ext not in {"xlsx", "xls"}:
+        raise HTTPException(status_code=400, detail="Only .xlsx / .xls accepted.")
+
+    raw = await file.read()
+
+    try:
+        import openpyxl as _xl
+        from psycopg2.extras import execute_values as _ev
+
+        wb = _xl.load_workbook(io.BytesIO(raw), read_only=True, data_only=True)
+        results = []
+
+        conn = _get_ctr_conn()
+        cur  = conn.cursor()
+
+        for sheet_name in wb.sheetnames:
+            if sheet_name.strip().lower() == "summary":
+                continue
+
+            ws   = wb[sheet_name]
+            rows_iter = list(ws.iter_rows(values_only=True))
+            if not rows_iter:
+                continue
+
+            # Skip header row (row 0), extract from data rows
+            data_rows = rows_iter[1:]
+
+            # Box columns: (id_col, url_col)
+            boxes = [(0, 1), (4, 5), (8, 9)]
+            records = []
+            for row in data_rows:
+                for id_ci, url_ci in boxes:
+                    uid  = row[id_ci]  if len(row) > id_ci  else None
+                    url  = row[url_ci] if len(row) > url_ci else None
+                    if url is None:
+                        continue
+                    url_str = str(url).strip()
+                    if not url_str or url_str.lower() in ("none", "nan", "sites"):
+                        continue
+                    records.append((sheet_name.strip(), int(uid) if uid else None, url_str))
+
+            # DELETE existing rows for this sheet_name, then INSERT fresh
+            cur.execute(
+                "DELETE FROM app_url_reference WHERE sheet_name = %s",
+                (sheet_name.strip(),),
+            )
+            if records:
+                _ev(
+                    cur,
+                    "INSERT INTO app_url_reference (sheet_name, url_id, url) VALUES %s",
+                    records,
+                    page_size=500,
+                )
+            conn.commit()
+            results.append({"sheet": sheet_name.strip(), "inserted": len(records)})
+            logger.info("app_url_reference updated: %s → %d rows", sheet_name.strip(), len(records))
+
+        cur.close()
+        conn.close()
+        wb.close()
+
+        total = sum(r["inserted"] for r in results)
+        return {"success": True, "sheets_updated": len(results), "total_urls": total, "details": results}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("update_app_urls failed")
+        raise HTTPException(status_code=500, detail=f"Update failed: {e}")
 
 
 @router.get("/download")

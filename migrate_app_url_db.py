@@ -16,15 +16,27 @@ import os
 import sys
 from pathlib import Path
 
+import os
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 import openpyxl
 import psycopg2
 from psycopg2.extras import execute_values
 
 # ---------------------------------------------------------------------------
-# Connection — hardcoded for local PostgreSQL
+# Connection — reads DATABASE_URL env var (or falls back to local dev)
 # ---------------------------------------------------------------------------
 
 def _get_conn():
+    url = os.environ.get("DATABASE_URL")
+    if url:
+        return psycopg2.connect(url, sslmode="require")
+    # local dev fallback
     return psycopg2.connect(
         host="localhost",
         port=5432,
