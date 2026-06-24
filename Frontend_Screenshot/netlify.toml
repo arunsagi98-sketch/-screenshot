@@ -3,7 +3,7 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "https://YOUR-APP.onrender.com/api/:splat"
+  to = "https://creative-scanner-backend-2.onrender.com/api/:splat"
   status = 200
   force = true
 
