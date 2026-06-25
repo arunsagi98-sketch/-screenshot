@@ -92,6 +92,16 @@ def health():
     return {"status": "online", "env": get_settings().app_env}
 
 
+@router.get("/ping", tags=["System"])
+def ping():
+    """
+    Lightweight keep-alive endpoint — no auth, no DB query.
+    Point an external cron (cron-job.org, UptimeRobot, etc.) at this URL
+    every 10 minutes to prevent Render from spinning down the service.
+    """
+    return {"pong": True}
+
+
 @router.get("/get-image-base64")
 async def get_image_base64(path: str, _: None = Depends(require_api_key)):
     """Return a single image as a base64 data-URL. Searched across all image folders."""

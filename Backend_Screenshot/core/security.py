@@ -3,6 +3,7 @@ Security helpers — password hashing and JWT creation/verification.
 """
 from __future__ import annotations
 
+import logging
 import os
 from datetime import datetime, timedelta, timezone
 from typing import Optional
@@ -10,15 +11,28 @@ from typing import Optional
 import bcrypt
 from jose import JWTError, jwt
 
+logger = logging.getLogger(__name__)
+
 # ── Secret key ────────────────────────────────────────────────────────────────
-JWT_SECRET      = os.getenv("JWT_SECRET", "change-me-in-production-supersecret-key")
+_DEFAULT_SECRET = "change-me-in-production-supersecret-key"
+JWT_SECRET      = os.getenv("JWT_SECRET", _DEFAULT_SECRET)
 JWT_ALGORITHM   = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "480"))  # 8 hours
 
+# Warn loudly if running in production with the default secret
+if JWT_SECRET == _DEFAULT_SECRET and os.getenv("APP_ENV", "development") == "production":
+    logger.critical(
+        "SECURITY: JWT_SECRET is set to the default placeholder in production! "
+        "Set a strong random JWT_SECRET env var immediately."
+    )
+
 # ── Password hashing (bcrypt direct — avoids passlib/bcrypt version conflicts) ─
+# rounds=10 (~100ms) vs default 12 (~400ms) — still secure, 4x faster on constrained CPU.
+_BCRYPT_ROUNDS = int(os.getenv("BCRYPT_ROUNDS", "10"))
+
 
 def hash_password(plain: str) -> str:
-    return bcrypt.hashpw(plain.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    return bcrypt.hashpw(plain.encode("utf-8"), bcrypt.gensalt(rounds=_BCRYPT_ROUNDS)).decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:

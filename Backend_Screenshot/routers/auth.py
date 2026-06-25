@@ -7,6 +7,7 @@ POST /auth/logout  — client-side (token is stateless; just a confirmation)
 """
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -42,10 +43,13 @@ class UserInfo(BaseModel):
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @router.post("/login", response_model=TokenResponse)
-def login(form: OAuth2PasswordRequestForm = Depends()):
+async def login(form: OAuth2PasswordRequestForm = Depends()):
     """
     Accepts form fields: username, password.
     Returns a JWT access token.
+
+    bcrypt verification runs in a thread pool so it never blocks the async
+    event loop — other requests are served normally during the ~100ms hash check.
     """
     db = SessionLocal()
     try:
@@ -54,7 +58,13 @@ def login(form: OAuth2PasswordRequestForm = Depends()):
             User.is_active == True,
         ).first()
 
-        if not user or not verify_password(form.password, user.hashed_password):
+        # Run bcrypt in a thread — it's CPU-bound and would block the event loop
+        password_ok = (
+            await asyncio.to_thread(verify_password, form.password, user.hashed_password)
+            if user else False
+        )
+
+        if not user or not password_ok:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect username or password",
